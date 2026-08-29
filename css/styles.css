@@ -1,0 +1,141 @@
+/* Professional UI/UX Stylesheet for Alexa Player */
+
+@keyframes pulse-slow {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.85; transform: scale(1.05); }
+}
+
+@keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+    animation: spin-slow 10s linear infinite;
+}
+
+.animate-pulse-beat {
+    animation: pulse-slow 0.5s ease-in-out infinite;
+}
+
+/* Realistic 3D Piano Key Styling */
+.key-white {
+    width: 46px;
+    height: 180px;
+    background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 85%, #e2e8f0 100%);
+    border: 1px solid #cbd5e1;
+    border-radius: 0 0 8px 8px;
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 6px 12px -2px rgba(0, 0, 0, 0.4), inset 0 -4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.key-white:hover {
+    background: linear-gradient(to bottom, #ffffff 0%, #f1f5f9 100%);
+}
+
+.key-white:active {
+    transform: translateY(3px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.key-black {
+    width: 28px;
+    height: 112px;
+    background: linear-gradient(to bottom, #334155 0%, #1e293b 70%, #0f172a 100%);
+    border: 1px solid #020617;
+    border-radius: 0 0 5px 5px;
+    position: absolute;
+    top: 0;
+    z-index: 10;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 14px rgba(0, 0, 0, 0.7), inset 0 2px 3px rgba(255, 255, 255, 0.15);
+}
+
+.key-black:hover {
+    background: linear-gradient(to bottom, #475569 0%, #1e293b 100%);
+}
+
+.key-black:active {
+    transform: translateY(3px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.6);
+}
+
+/* Key Active & Root Glow States */
+.key-white.active-chord-key {
+    background: linear-gradient(to bottom, #60a5fa 0%, #2563eb 80%, #1d4ed8 100%) !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 22px rgba(37, 99, 235, 0.95), inset 0 -6px 10px rgba(0, 0, 0, 0.4) !important;
+}
+
+.key-white.root-chord-key {
+    background: linear-gradient(to bottom, #34d399 0%, #059669 80%, #047857 100%) !important;
+    border-color: #10b981 !important;
+    box-shadow: 0 0 24px rgba(16, 185, 129, 0.95), inset 0 -6px 10px rgba(0, 0, 0, 0.4) !important;
+}
+
+.key-black.active-chord-key {
+    background: linear-gradient(to bottom, #3b82f6 0%, #1d4ed8 100%) !important;
+    border-color: #93c5fd !important;
+    box-shadow: 0 0 22px rgba(59, 130, 246, 0.95) !important;
+}
+
+.key-black.root-chord-key {
+    background: linear-gradient(to bottom, #10b981 0%, #047857 100%) !important;
+    border-color: #6ee7b7 !important;
+    box-shadow: 0 0 24px rgba(16, 185, 129, 0.95) !important;
+}
+
+/* Key labels */
+.key-label {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    font-weight: 800;
+    pointer-events: none;
+    letter-spacing: -0.5px;
+}
+
+.key-white .key-label {
+    color: #64748b;
+}
+
+.key-white.active-chord-key .key-label,
+.key-white.root-chord-key .key-label {
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+.key-black .key-label {
+    color: #94a3b8;
+    bottom: 8px;
+    font-size: 9px;
+}
+
+.key-black.active-chord-key .key-label,
+.key-black.root-chord-key .key-label {
+    color: #ffffff;
+}
+
+/* Custom Scrollbar for Timeline */
+.scrollbar-thin::-webkit-scrollbar {
+    height: 7px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+    background: #090d16;
+    border-radius: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 6px;
+    border: 1px solid #334155;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #3b82f6;
+}
