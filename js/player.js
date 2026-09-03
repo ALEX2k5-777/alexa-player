@@ -1,6 +1,7 @@
 /**
- * Alexa Player - Music Player, Transposer & Waveform Controller
- * Manages audio playback, time stretching practice speed, transpose semitone shifting, and live chord syncing.
+ * Alexa Player - Music Player, Transposer & 4-Channel AI Stem Mixer
+ * Manages audio playback, time stretching practice speed, transpose semitone shifting,
+ * and 4-channel Web Audio DSP Stem Mixing (Vocals, Keyboard, Bass, Drums).
  */
 
 class MusicPlayer {
@@ -10,7 +11,22 @@ class MusicPlayer {
         this.isPlaying = false;
         this.activeChordIndex = -1;
         this.loopEnabled = false;
-        this.transposeOffset = 0; // -6 to +6 semitones
+        this.transposeOffset = 0;
+
+        // Web Audio API DSP Stem Mixer Nodes
+        this.audioCtx = null;
+        this.sourceNode = null;
+        
+        // 4 Stem Gain Nodes
+        this.stemGains = {
+            vocals: null,
+            keyboard: null,
+            bass: null,
+            drums: null
+        };
+
+        this.stemMuted = { vocals: false, keyboard: false, bass: false, drums: false };
+        this.stemSolo = { vocals: false, keyboard: false, bass: false, drums: false };
 
         // DOM elements
         this.playPauseBtn = document.getElementById('playPauseBtn');
@@ -24,7 +40,6 @@ class MusicPlayer {
         this.rewindBtn = document.getElementById('rewindBtn');
         this.forwardBtn = document.getElementById('forwardBtn');
         
-        // Transpose DOM elements
         this.transposeUpBtn = document.getElementById('transposeUpBtn');
         this.transposeDownBtn = document.getElementById('transposeDownBtn');
         this.transposeResetBtn = document.getElementById('transposeResetBtn');
@@ -32,12 +47,12 @@ class MusicPlayer {
 
         this.currentTimeDisplay = document.getElementById('currentTimeDisplay');
         this.totalDurationDisplay = document.getElementById('totalDurationDisplay');
-        
         this.waveformCanvas = document.getElementById('waveformCanvas');
         this.canvasCtx = this.waveformCanvas ? this.waveformCanvas.getContext('2d') : null;
         this.timelineContainer = document.getElementById('chordTimelineContainer');
 
         this.initListeners();
+        this.initStemMixerUI();
     }
 
     initListeners() {
@@ -79,7 +94,6 @@ class MusicPlayer {
             });
         }
 
-        // Transpose Controls Event Listeners
         if (this.transposeUpBtn) {
             this.transposeUpBtn.addEventListener('click', () => {
                 if (this.transposeOffset < 6) {
@@ -122,15 +136,202 @@ class MusicPlayer {
     }
 
     /**
-     * Load track data
+     * Build Web Audio API DSP 4-Channel Stem Routing Graph
      */
+    setupAudioNodes() {
+        if (this.sourceNode) return;
+        try {
+            this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            this.sourceNode = this.audioCtx.createMediaElementSource(this.audio);
+
+            // 1. Bass Stem Filter (Lowpass < 250Hz)
+            const bassFilter = this.audioCtx.createBiquadFilter();
+            bassFilter.type = 'lowpass';
+            bassFilter.frequency.value = 250;
+            this.stemGains.bass = this.audioCtx.createGain();
+            this.sourceNode.connect(bassFilter);
+            bassFilter.connect(this.stemGains.bass);
+            this.stemGains.bass.connect(this.audioCtx.destination);
+
+            // 2. Keyboard / Piano Stem Filter (Bandpass 300Hz - 2500Hz)
+            const kbFilter = this.audioCtx.createBiquadFilter();
+            kbFilter.type = 'bandpass';
+            kbFilter.frequency.value = 1000;
+            kbFilter.Q.value = 1.0;
+            this.stemGains.keyboard = this.audioCtx.createGain();
+            this.sourceNode.connect(kbFilter);
+            kbFilter.connect(this.stemGains.keyboard);
+            this.stemGains.keyboard.connect(this.audioCtx.destination);
+
+            // 3. Vocals Stem Filter (Highpass 1200Hz)
+            const vocalFilter = this.audioCtx.createBiquadFilter();
+            vocalFilter.type = 'highpass';
+            vocalFilter.frequency.value = 1200;
+            this.stemGains.vocals = this.audioCtx.createGain();
+            this.sourceNode.connect(vocalFilter);
+            vocalFilter.connect(this.stemGains.vocals);
+            this.stemGains.vocals.connect(this.audioCtx.destination);
+
+            // 4. Drums / Beats Stem Filter (Highpass 3500Hz + Peak Transient)
+            const drumFilter = this.audioCtx.createBiquadFilter();
+            drumFilter.type = 'highpass';
+            drumFilter.frequency.value = 3500;
+            this.stemGains.drums = this.audioCtx.createGain();
+            this.sourceNode.connect(drumFilter);
+            drumFilter.connect(this.stemGains.drums);
+            this.stemGains.drums.connect(this.audioCtx.destination);
+
+        } catch (e) {
+            console.warn('Web Audio DSP Routing notice:', e);
+        }
+    }
+
+    /**
+     * Initialize Stem Mixer Sliders and Preset Buttons
+     */
+    initStemMixerUI() {
+        const stems = ['Vocals', 'Keyboard', 'Bass', 'Drums'];
+        
+        stems.forEach(stem => {
+            const lower = stem.toLowerCase();
+            const slider = document.getElementById(`vol${stem}`);
+            const valLabel = document.getElementById(`val${stem}`);
+            const muteBtn = document.getElementById(`mute${stem}Btn`);
+            const soloBtn = document.getElementById(`solo${stem}Btn`);
+
+            if (slider) {
+                slider.addEventListener('input', (e) => {
+                    const val = parseFloat(e.target.value);
+                    if (valLabel) valLabel.textContent = `${Math.round(val * 100)}%`;
+                    this.updateStemGain(lower, val);
+                });
+            }
+
+            if (muteBtn) {
+                muteBtn.addEventListener('click', () => {
+                    this.stemMuted[lower] = !this.stemMuted[lower];
+                    muteBtn.classList.toggle('bg-red-600', this.stemMuted[lower]);
+                    muteBtn.classList.toggle('text-white', this.stemMuted[lower]);
+                    this.applyMixerState();
+                });
+            }
+
+            if (soloBtn) {
+                soloBtn.addEventListener('click', () => {
+                    this.stemSolo[lower] = !this.stemSolo[lower];
+                    soloBtn.classList.toggle('bg-purple-600', this.stemSolo[lower]);
+                    soloBtn.classList.toggle('text-white', this.stemSolo[lower]);
+                    this.applyMixerState();
+                });
+            }
+        });
+
+        // Presets
+        const btnFull = document.getElementById('presetFullMix');
+        const btnMuteKb = document.getElementById('presetMuteKeyboard');
+        const btnKaraoke = document.getElementById('presetKaraoke');
+        const btnSoloKb = document.getElementById('presetSoloKeyboard');
+
+        if (btnFull) {
+            btnFull.addEventListener('click', () => {
+                this.resetStemMixer();
+            });
+        }
+
+        if (btnMuteKb) {
+            btnMuteKb.addEventListener('click', () => {
+                this.setStemVolume('keyboard', 0);
+                this.setStemVolume('vocals', 1);
+                this.setStemVolume('bass', 1);
+                this.setStemVolume('drums', 1);
+            });
+        }
+
+        if (btnKaraoke) {
+            btnKaraoke.addEventListener('click', () => {
+                this.setStemVolume('vocals', 0);
+                this.setStemVolume('keyboard', 1);
+                this.setStemVolume('bass', 1);
+                this.setStemVolume('drums', 1);
+            });
+        }
+
+        if (btnSoloKb) {
+            btnSoloKb.addEventListener('click', () => {
+                this.setStemVolume('keyboard', 1);
+                this.setStemVolume('vocals', 0);
+                this.setStemVolume('bass', 0);
+                this.setStemVolume('drums', 0);
+            });
+        }
+    }
+
+    setStemVolume(stemName, val) {
+        const titleCase = stemName.charAt(0).toUpperCase() + stemName.slice(1);
+        const slider = document.getElementById(`vol${titleCase}`);
+        const valLabel = document.getElementById(`val${titleCase}`);
+        if (slider) slider.value = val;
+        if (valLabel) valLabel.textContent = `${Math.round(val * 100)}%`;
+        this.updateStemGain(stemName, val);
+    }
+
+    updateStemGain(stemName, val) {
+        if (this.stemGains[stemName] && this.audioCtx) {
+            this.stemGains[stemName].gain.setValueAtTime(val, this.audioCtx.currentTime);
+        }
+    }
+
+    applyMixerState() {
+        const anySolo = Object.values(this.stemSolo).some(v => v);
+        const stems = ['vocals', 'keyboard', 'bass', 'drums'];
+
+        stems.forEach(s => {
+            let targetVol = 1.0;
+            const slider = document.getElementById(`vol${s.charAt(0).toUpperCase() + s.slice(1)}`);
+            if (slider) targetVol = parseFloat(slider.value);
+
+            if (this.stemMuted[s]) {
+                this.updateStemGain(s, 0);
+            } else if (anySolo) {
+                if (this.stemSolo[s]) {
+                    this.updateStemGain(s, targetVol);
+                } else {
+                    this.updateStemGain(s, 0);
+                }
+            } else {
+                this.updateStemGain(s, targetVol);
+            }
+        });
+    }
+
+    resetStemMixer() {
+        const stems = ['vocals', 'keyboard', 'bass', 'drums'];
+        stems.forEach(s => {
+            this.stemMuted[s] = false;
+            this.stemSolo[s] = false;
+            this.setStemVolume(s, 1.0);
+
+            const titleCase = s.charAt(0).toUpperCase() + s.slice(1);
+            const muteBtn = document.getElementById(`mute${titleCase}Btn`);
+            const soloBtn = document.getElementById(`solo${titleCase}Btn`);
+            if (muteBtn) {
+                muteBtn.classList.remove('bg-red-600', 'text-white');
+            }
+            if (soloBtn) {
+                soloBtn.classList.remove('bg-purple-600', 'text-white');
+            }
+        });
+    }
+
     loadTrack(trackData, audioFile) {
         this.currentTrack = trackData;
-        this.transposeOffset = 0; // Reset transpose on new song
+        this.transposeOffset = 0;
         
         const objectUrl = URL.createObjectURL(audioFile);
         this.audio.src = objectUrl;
         this.audio.playbackRate = parseFloat(this.speedSelector ? this.speedSelector.value : 1.0);
+
+        this.setupAudioNodes();
 
         document.getElementById('trackTitle').textContent = trackData.title;
         document.getElementById('displayBpm').textContent = trackData.bpm;
@@ -151,9 +352,6 @@ class MusicPlayer {
         this.updateTransposeState();
     }
 
-    /**
-     * Update Transpose State and re-calculate chords across UI
-     */
     updateTransposeState() {
         if (this.transposeDisplayBadge) {
             if (this.transposeOffset === 0) {
@@ -170,10 +368,8 @@ class MusicPlayer {
 
         if (!this.currentTrack || !this.currentTrack.chordsTimeline) return;
 
-        // Render transposed chord progression timeline
         this.renderChordTimeline(this.currentTrack.chordsTimeline);
 
-        // Update active playing chord
         if (this.activeChordIndex >= 0 && this.activeChordIndex < this.currentTrack.chordsTimeline.length) {
             this.setCurrentChord(this.currentTrack.chordsTimeline[this.activeChordIndex]);
         } else if (this.currentTrack.chordsTimeline.length > 0) {
@@ -183,6 +379,9 @@ class MusicPlayer {
 
     togglePlayPause() {
         if (!this.audio.src) return;
+        if (this.audioCtx && this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume();
+        }
         if (this.isPlaying) {
             this.audio.pause();
             this.isPlaying = false;
@@ -247,7 +446,6 @@ class MusicPlayer {
     setCurrentChord(rawChordData) {
         if (!rawChordData) return;
         
-        // Apply Transposition Offset
         const transposedChord = window.audioAnalyzer.transposeChordName(rawChordData.chord, this.transposeOffset);
         const transposedNotes = window.audioAnalyzer.transposeNoteList(rawChordData.notes, this.transposeOffset);
 
@@ -260,15 +458,11 @@ class MusicPlayer {
         const notesText = transposedNotes.join(' - ');
         document.getElementById('bannerChordNotes').textContent = `[${notesText}]`;
 
-        // Update Beginner Keyboard Guide visualizer highlights with transposed notes
         if (window.pianoVisualizer) {
             window.pianoVisualizer.highlightChord(transposedChord, transposedNotes);
         }
     }
 
-    /**
-     * Render scrolling interactive chord timeline with transposed chord names
-     */
     renderChordTimeline(timeline) {
         if (!this.timelineContainer) return;
         this.timelineContainer.innerHTML = '';
@@ -313,9 +507,6 @@ class MusicPlayer {
         });
     }
 
-    /**
-     * Draw audio waveform on canvas
-     */
     drawWaveform(audioBuffer, playheadTime = 0) {
         if (!this.waveformCanvas || !this.canvasCtx) return;
 

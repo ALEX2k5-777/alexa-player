@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alexa Player - Professional Audio Analyzer & Keyboard Transpose Guide</title>
+    <title>Alexa Player - Professional Audio Analyzer, Stem Separator & Keyboard Guide</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -48,11 +48,11 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-200 to-purple-300">
-                            Alexa Player
+                            Alexa Player Pro
                         </h1>
-                        <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full">Pro Keyboard AI</span>
+                        <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full">AI Stem Splitter</span>
                     </div>
-                    <p class="text-xs text-slate-400">Audio Spectrum Analyzer • Auto Chord Detection • Real-Time Key Transposer</p>
+                    <p class="text-xs text-slate-400">Audio Spectrum Analyzer • Instrument Stem Separator • Real-Time Key Transposer</p>
                 </div>
             </div>
             
@@ -76,11 +76,11 @@
             </div>
             <div>
                 <h3 class="text-xl font-bold text-slate-100">Upload your Audio Track (MP3, WAV, M4A)</h3>
-                <p class="text-sm text-slate-400 mt-1 max-w-md mx-auto">Drag & drop your song file here. The AI engine will analyze Tempo, Time Signature, Chords & Keyboard Fingerings.</p>
+                <p class="text-sm text-slate-400 mt-1 max-w-md mx-auto">Drag & drop your song file here. The AI engine will separate instrument stems, detect Tempo, Chords & Keyboard Fingerings.</p>
             </div>
             <div class="flex flex-wrap justify-center gap-2 text-xs text-slate-400 mt-2">
+                <span class="px-3 py-1 bg-slate-800/80 border border-slate-700/60 rounded-lg flex items-center gap-1.5"><i data-lucide="layers" class="w-3.5 h-3.5 text-purple-400"></i> AI Instrument Stem Splitter</span>
                 <span class="px-3 py-1 bg-slate-800/80 border border-slate-700/60 rounded-lg flex items-center gap-1.5"><i data-lucide="activity" class="w-3.5 h-3.5 text-blue-400"></i> Auto BPM Detection</span>
-                <span class="px-3 py-1 bg-slate-800/80 border border-slate-700/60 rounded-lg flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5 text-indigo-400"></i> Time Signature</span>
                 <span class="px-3 py-1 bg-slate-800/80 border border-slate-700/60 rounded-lg flex items-center gap-1.5"><i data-lucide="piano" class="w-3.5 h-3.5 text-emerald-400"></i> Live Key Transposer</span>
             </div>
         </div>
@@ -93,8 +93,8 @@
                 <i data-lucide="disc" class="w-10 h-10 text-blue-400 absolute inset-0 m-auto animate-pulse"></i>
             </div>
             <div>
-                <h4 class="text-xl font-bold text-slate-100">Analyzing Song Audio...</h4>
-                <p id="analysisStatusText" class="text-sm text-slate-400 mt-1">Extracting 4096-point FFT Pitch Class Chromagram & Beat Onsets</p>
+                <h4 class="text-xl font-bold text-slate-100">Analyzing Song & Splitting Instrument Stems...</h4>
+                <p id="analysisStatusText" class="text-sm text-slate-400 mt-1">Isolating Vocals, Keyboard/Piano, Bass, and Drums Stems</p>
             </div>
             <div class="w-80 h-2.5 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700/50">
                 <div id="analysisProgressBar" class="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-full w-0 transition-all duration-300"></div>
@@ -182,6 +182,109 @@
 
             </div>
 
+            <!-- AI Multi-Track Instrument Stem Separator Mixer -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 flex flex-col gap-4 shadow-2xl backdrop-blur-md">
+                <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800/80 pb-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 flex items-center justify-center">
+                            <i data-lucide="sliders" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-slate-100 flex items-center gap-2">
+                                <span>Multi-Track Instrument Stem Separator & Mixer</span>
+                                <span class="px-2 py-0.5 text-[10px] font-extrabold uppercase bg-purple-500/20 text-purple-300 rounded border border-purple-500/30">AI Active</span>
+                            </h3>
+                            <p class="text-xs text-slate-400 mt-0.5">Solo or mute individual instruments to practice playing keyboard over backing tracks!</p>
+                        </div>
+                    </div>
+
+                    <!-- Stem Practice Preset Buttons -->
+                    <div class="flex flex-wrap items-center gap-2 text-xs font-semibold">
+                        <button id="presetFullMix" class="px-3 py-1.5 rounded-lg bg-blue-600 text-white shadow-md transition active:scale-95">Full Mix</button>
+                        <button id="presetMuteKeyboard" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-purple-300 border border-purple-500/30 transition active:scale-95">🎹 Mute Keyboard (Play Along)</button>
+                        <button id="presetKaraoke" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/30 transition active:scale-95">🎤 Mute Vocals (Karaoke)</button>
+                        <button id="presetSoloKeyboard" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 transition active:scale-95">Solo Piano</button>
+                    </div>
+                </div>
+
+                <!-- 4 Stem Channel Mixer Controls -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
+                    
+                    <!-- 1. Vocals Channel -->
+                    <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 flex flex-col gap-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2 text-pink-400 font-bold text-sm">
+                                <i data-lucide="mic" class="w-4 h-4"></i>
+                                <span>Vocals / Lead</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button id="soloVocalsBtn" class="px-2 py-0.5 text-[10px] font-extrabold rounded bg-slate-800 text-slate-400 border border-slate-700 hover:text-white transition">SOLO</button>
+                                <button id="muteVocalsBtn" class="px-2 py-0.5 text-[10px] font-extrabold rounded bg-slate-800 text-slate-400 border border-slate-700 hover:text-red-400 transition">MUTE</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <input type="range" id="volVocals" min="0" max="1" step="0.05" value="1" class="w-full accent-pink-500 cursor-pointer">
+                            <span id="valVocals" class="text-xs font-mono font-bold text-pink-300 min-w-[32px] text-right">100%</span>
+                        </div>
+                    </div>
+
+                    <!-- 2. Keyboard / Piano Channel -->
+                    <div class="bg-slate-950/80 border border-purple-500/30 rounded-2xl p-4 flex flex-col gap-3 bg-gradient-to-b from-purple-950/10 to-transparent">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2 text-purple-400 font-bold text-sm">
+                                <i data-lucide="piano" class="w-4 h-4"></i>
+                                <span>Keyboard / Piano</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button id="soloKeyboardBtn" class="px-2 py-0.5 text-[10px] font-extrabold rounded bg-slate-800 text-slate-400 border border-slate-700 hover:text-white transition">SOLO</button>
+                                <button id="muteKeyboardBtn" class="px-2 py-0.5 text-[10px] font-extrabold rounded bg-slate-800 text-slate-400 border border-slate-700 hover:text-red-400 transition">MUTE</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <input type="range" id="volKeyboard" min="0" max="1" step="0.05" value="1" class="w-full accent-purple-500 cursor-pointer">
+                            <span id="valKeyboard" class="text-xs font-mono font-bold text-purple-300 min-w-[32px] text-right">100%</span>
+                        </div>
+                    </div>
+
+                    <!-- 3. Bass Channel -->
+                    <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 flex flex-col gap-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2 text-blue-400 font-bold text-sm">
+                                <i data-lucide="volume-2" class="w-4 h-4"></i>
+                                <span>Bass Guitar</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button id="soloBassBtn" class="px-2 py-0.5 text-[10px] font-extrabold rounded bg-slate-800 text-slate-400 border border-slate-700 hover:text-white transition">SOLO</button>
+                                <button id="muteBassBtn" class="px-2 py-0.5 text-[10px] font-extrabold rounded bg-slate-800 text-slate-400 border border-slate-700 hover:text-red-400 transition">MUTE</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <input type="range" id="volBass" min="0" max="1" step="0.05" value="1" class="w-full accent-blue-500 cursor-pointer">
+                            <span id="valBass" class="text-xs font-mono font-bold text-blue-300 min-w-[32px] text-right">100%</span>
+                        </div>
+                    </div>
+
+                    <!-- 4. Drums & Percussion Channel -->
+                    <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 flex flex-col gap-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2 text-amber-400 font-bold text-sm">
+                                <i data-lucide="disc" class="w-4 h-4"></i>
+                                <span>Drums / Beats</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button id="soloDrumsBtn" class="px-2 py-0.5 text-[10px] font-extrabold rounded bg-slate-800 text-slate-400 border border-slate-700 hover:text-white transition">SOLO</button>
+                                <button id="muteDrumsBtn" class="px-2 py-0.5 text-[10px] font-extrabold rounded bg-slate-800 text-slate-400 border border-slate-700 hover:text-red-400 transition">MUTE</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <input type="range" id="volDrums" min="0" max="1" step="0.05" value="1" class="w-full accent-amber-500 cursor-pointer">
+                            <span id="valDrums" class="text-xs font-mono font-bold text-amber-300 min-w-[32px] text-right">100%</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
             <!-- Waveform & Music Player Controls Container -->
             <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 flex flex-col gap-5 shadow-2xl backdrop-blur-md">
                 <!-- Track info header -->
@@ -192,7 +295,7 @@
                         </div>
                         <div>
                             <h2 id="trackTitle" class="text-base font-bold text-slate-100">Loaded Song Track</h2>
-                            <p id="trackMeta" class="text-xs text-slate-400">Audio File Ready • High Precision MIR FFT Loaded</p>
+                            <p id="trackMeta" class="text-xs text-slate-400">Audio File Ready • Multi-Track Stem Mixer Enabled</p>
                         </div>
                     </div>
 
@@ -319,7 +422,7 @@
 
     <!-- Footer -->
     <footer class="border-t border-slate-900 bg-slate-950 py-5 text-center text-xs text-slate-500 mt-auto">
-        <p>Alexa Player • AI Music Spectrum Analyzer & Keyboard Transposer • Professional Edition</p>
+        <p>Alexa Player Pro • AI Music Spectrum Analyzer, Instrument Stem Separator & Keyboard Transposer</p>
     </footer>
 
     <!-- App JavaScript Scripts -->
