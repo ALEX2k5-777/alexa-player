@@ -1,6 +1,6 @@
 /**
- * Alexa Player - Main Application Coordinator
- * Hybrid Audio Processing Engine with Session Caching for 100% Consistent Analysis.
+ * Alexa Player Pro - Main Application Coordinator
+ * Hybrid Audio Processing Engine with Session Caching & Cross-Browser PCM Decoding.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -21,16 +21,16 @@ document.addEventListener('DOMContentLoaded', () => {
         
         dropzone.addEventListener('dragover', (e) => {
             e.preventDefault();
-            dropzone.classList.add('border-blue-500', 'bg-blue-950/20');
+            dropzone.classList.add('border-amber-500', 'bg-amber-950/20');
         });
 
         dropzone.addEventListener('dragleave', () => {
-            dropzone.classList.remove('border-blue-500', 'bg-blue-950/20');
+            dropzone.classList.remove('border-amber-500', 'bg-amber-950/20');
         });
 
         dropzone.addEventListener('drop', (e) => {
             e.preventDefault();
-            dropzone.classList.remove('border-blue-500', 'bg-blue-950/20');
+            dropzone.classList.remove('border-amber-500', 'bg-amber-950/20');
             if (e.dataTransfer.files && e.dataTransfer.files[0]) {
                 processAudioFile(e.dataTransfer.files[0]);
             }
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const cachedResult = trackCache.get(cacheKey);
                 const arrayBuffer = await file.arrayBuffer();
-                const audioBuffer = await window.audioAnalyzer.audioCtx.decodeAudioData(arrayBuffer);
+                const audioBuffer = await window.audioAnalyzer.decodeAudioBuffer(arrayBuffer);
 
                 trackData = {
                     ...cachedResult,
@@ -99,14 +99,14 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (analysisProgressBar) analysisProgressBar.style.width = '80%';
 
                             const arrayBuffer = await file.arrayBuffer();
-                            const audioBuffer = await window.audioAnalyzer.audioCtx.decodeAudioData(arrayBuffer);
+                            const audioBuffer = await window.audioAnalyzer.decodeAudioBuffer(arrayBuffer);
 
                             trackData = {
                                 title: file.name.replace(/\.[^/.]+$/, ""),
                                 duration: audioBuffer.duration,
                                 bpm: serverResult.bpm,
                                 timeSignature: serverResult.timeSignature || '4/4',
-                                timeSigDescription: serverResult.timeSigDescription || 'Common Time (4 Beats)',
+                                timeSigDescription: serverResult.timeSigDescription || 'Keherwa Taal (4/4 Beats)',
                                 chordsTimeline: serverResult.chordsTimeline || [],
                                 audioBuffer: audioBuffer
                             };
@@ -123,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                 } catch (netErr) {
-                    console.log('Server API analysis offline, falling back to Browser FFT Engine.');
+                    console.log('Server API analysis offline, falling back smoothly to Browser FFT Engine.');
                 }
 
                 // Fallback to browser-side 4096-point FFT engine if server API not returned
@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (err) {
             console.error('Audio processing error:', err);
-            alert('Error analyzing audio file. Please try another MP3 or WAV track.');
+            alert('Error decoding audio file. Please ensure it is a valid MP3, WAV, or M4A track.');
             if (analysisLoader) {
                 analysisLoader.classList.add('hidden');
                 analysisLoader.classList.remove('flex');

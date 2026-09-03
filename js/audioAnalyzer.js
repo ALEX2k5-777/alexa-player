@@ -1,30 +1,14 @@
 /**
- * Alexa Player - Advanced Audio Analyzer Engine with Transposition & Indian Sargam (Sa Re Ga Ma) Notation
+ * Alexa Player Pro - Advanced Audio Analyzer Engine with Indian Sargam (Sa Re Ga Ma) Swaras
  * Uses Real Web Audio API 4096-point FFT Decibel Spectrum Analysis & Pitch Class Profiling (Chromagram)
  * to accurately detect Tempo (BPM), Time Signature, Keys, Chords, and Indian Sargam Swaras.
  */
 
 class AudioAnalyzer {
     constructor() {
-        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        this.audioCtx = null;
 
         this.NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-
-        // Indian Sargam Swara Mapping relative to Scale Root (Sa)
-        this.SARGAM_SWARAS = [
-            'Sa',        // 0 semitones (Root)
-            're (re)',   // 1 semitone (Komal Re)
-            'Re',        // 2 semitones (Shuddha Re)
-            'ga (ga)',   // 3 semitones (Komal Ga)
-            'Ga',        // 4 semitones (Shuddha Ga)
-            'Ma',        // 5 semitones (Shuddha Ma)
-            'Ma\' (tM)', // 6 semitones (Teevra Ma)
-            'Pa',        // 7 semitones (Pancham)
-            'dha (dha)', // 8 semitones (Komal Dha)
-            'Dha',       // 9 semitones (Shuddha Dha)
-            { swara: 'ni (ni)' }, // 10 semitones (Komal Ni)
-            'Ni'         // 11 semitones (Shuddha Ni)
-        ];
 
         this.SARGAM_NAMES = ['Sa', 're', 'Re', 'ga', 'Ga', 'Ma', 'tM', 'Pa', 'dha', 'Dha', 'ni', 'Ni'];
 
@@ -73,16 +57,39 @@ class AudioAnalyzer {
     }
 
     /**
-     * Convert Western Note list to Indian Sargam Swaras (Sa Re Ga Ma Pa Dha Ni)
-     * relative to Scale Root (default C = Sa)
+     * Cross-browser PCM AudioBuffer decoder
      */
+    async decodeAudioBuffer(arrayBuffer) {
+        if (!this.audioCtx) {
+            this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (this.audioCtx.state === 'suspended') {
+            try { await this.audioCtx.resume(); } catch (e) {}
+        }
+
+        return new Promise((resolve, reject) => {
+            try {
+                const promise = this.audioCtx.decodeAudioData(
+                    arrayBuffer,
+                    (decoded) => resolve(decoded),
+                    (err) => reject(err)
+                );
+                if (promise && typeof promise.then === 'function') {
+                    promise.then(resolve).catch(reject);
+                }
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
     getSargamSwaras(noteList, scaleRoot = 'C') {
         if (!noteList || noteList.length === 0) return 'Sa - Ga - Pa';
         const rootIndex = this.NOTE_NAMES.indexOf(scaleRoot.replace(/\d/, ''));
         const validRootIdx = rootIndex !== -1 ? rootIndex : 0;
 
         const swaras = noteList.map(noteStr => {
-            const cleanNote = noteStr.replace(/\d/, '');
+            const cleanNote = String(noteStr).replace(/\d/, '');
             const noteIdx = this.NOTE_NAMES.indexOf(cleanNote);
             if (noteIdx === -1) return 'Sa';
             const interval = (noteIdx - validRootIdx + 12) % 12;
@@ -92,24 +99,21 @@ class AudioAnalyzer {
         return swaras.join(' - ');
     }
 
-    /**
-     * Get Indian Taal Name corresponding to Time Signature
-     */
     getIndianTaal(timeSig) {
         if (timeSig === '4/4' || timeSig === '2/4') {
-            return { taal: 'Keherwa Taal (Kaherva)', beats: '4/4 or 8 Beats (Bollywood / Filmi)' };
+            return { taal: 'Keherwa Taal', beats: '4/4 Beats (Bollywood)' };
         } else if (timeSig === '3/4' || timeSig === '6/8') {
-            return { taal: 'Dadra Taal', beats: '3/4 or 6 Beats (Folk / Garba / Bhajan)' };
+            return { taal: 'Dadra Taal', beats: '3/4 Beats (Bhajan/Garba)' };
         } else if (timeSig === '7/8') {
-            return { taal: 'Rupak Taal', beats: '7 Beats (3+2+2 Semi-Classical)' };
+            return { taal: 'Rupak Taal', beats: '7 Beats (Semi-Classical)' };
         }
         return { taal: 'Keherwa Taal', beats: 'Common Rhythm' };
     }
 
     transposeNote(noteStr, semitones) {
-        if (!noteStr || semitones === 0) return noteStr;
-        const match = noteStr.match(/^([A-G][#b]?)(\d)?$/);
-        if (!match) return noteStr;
+        if (!noteStr || semitones === 0) return String(noteStr);
+        const match = String(noteStr).match(/^([A-G][#b]?)(\d)?$/);
+        if (!match) return String(noteStr);
 
         let noteName = match[1];
         let octave = match[2] ? parseInt(match[2], 10) : 4;
@@ -118,7 +122,7 @@ class AudioAnalyzer {
         if (flatMap[noteName]) noteName = flatMap[noteName];
 
         let index = this.NOTE_NAMES.indexOf(noteName);
-        if (index === -1) return noteStr;
+        if (index === -1) return String(noteStr);
 
         let newIndex = index + semitones;
         while (newIndex >= 12) {
@@ -134,9 +138,9 @@ class AudioAnalyzer {
     }
 
     transposeChordName(chordStr, semitones) {
-        if (!chordStr || semitones === 0) return chordStr;
-        const match = chordStr.match(/^([A-G][#b]?)(.*)$/);
-        if (!match) return chordStr;
+        if (!chordStr || semitones === 0) return String(chordStr);
+        const match = String(chordStr).match(/^([A-G][#b]?)(.*)$/);
+        if (!match) return String(chordStr);
 
         let root = match[1];
         const quality = match[2] || '';
@@ -145,7 +149,7 @@ class AudioAnalyzer {
         if (flatMap[root]) root = flatMap[root];
 
         const index = this.NOTE_NAMES.indexOf(root);
-        if (index === -1) return chordStr;
+        if (index === -1) return String(chordStr);
 
         const newIndex = ((index + semitones) % 12 + 12) % 12;
         return `${this.NOTE_NAMES[newIndex]}${quality}`;
@@ -161,7 +165,7 @@ class AudioAnalyzer {
         const arrayBuffer = await file.arrayBuffer();
 
         if (onProgress) onProgress(30, 'Decoding PCM audio samples...');
-        const audioBuffer = await this.audioCtx.decodeAudioData(arrayBuffer);
+        const audioBuffer = await this.decodeAudioBuffer(arrayBuffer);
 
         if (onProgress) onProgress(50, 'Performing FFT Spectral Onset & BPM analysis...');
         const bpm = this.detectBPM(audioBuffer);
