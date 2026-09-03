@@ -1,7 +1,7 @@
 /**
- * Alexa Player - Music Player, Transposer & Advanced Wiener Soft-Masking 4-Channel AI Stem Mixer
- * Manages audio playback, time stretching practice speed, transpose semitone shifting,
- * and 4-channel Web Audio DSP Soft-Masking Stem Mixing (Vocals, Keyboard, Bass, Drums).
+ * Alexa Player Pro - Music Player, Transposer, Sargam Swara Engine & 4-Channel AI Stem Mixer
+ * Manages audio playback, practice speed, transpose shifting, Indian Sargam (Sa Re Ga Ma) Swaras,
+ * Indian Taal recognition (Keherwa, Dadra, Rupak), and 4-channel Web Audio DSP Stem Mixing.
  */
 
 class MusicPlayer {
@@ -12,23 +12,15 @@ class MusicPlayer {
         this.activeChordIndex = -1;
         this.loopEnabled = false;
         this.transposeOffset = 0;
+        this.scaleRoot = 'C'; // Scale 1 = Sa (Default C)
 
-        // Web Audio API DSP Stem Mixer Nodes
         this.audioCtx = null;
         this.sourceNode = null;
         
-        // 4 Stem Gain Nodes & Biquad Filters
-        this.stemGains = {
-            vocals: null,
-            keyboard: null,
-            bass: null,
-            drums: null
-        };
-
+        this.stemGains = { vocals: null, keyboard: null, bass: null, drums: null };
         this.stemMuted = { vocals: false, keyboard: false, bass: false, drums: false };
         this.stemSolo = { vocals: false, keyboard: false, bass: false, drums: false };
 
-        // DOM elements
         this.playPauseBtn = document.getElementById('playPauseBtn');
         this.playIcon = document.getElementById('playIcon');
         this.pauseIcon = document.getElementById('pauseIcon');
@@ -135,16 +127,12 @@ class MusicPlayer {
         });
     }
 
-    /**
-     * Setup Advanced 4-Channel Web Audio DSP Soft-Masking Filter Bank
-     */
     setupAudioNodes() {
         if (this.sourceNode) return;
         try {
             this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             this.sourceNode = this.audioCtx.createMediaElementSource(this.audio);
 
-            // Master Limiter to prevent clipping when summing stems
             const masterLimiter = this.audioCtx.createDynamicsCompressor();
             masterLimiter.threshold.value = -1.0;
             masterLimiter.knee.value = 0.0;
@@ -153,7 +141,6 @@ class MusicPlayer {
             masterLimiter.release.value = 0.1;
             masterLimiter.connect(this.audioCtx.destination);
 
-            // 1. Bass Stem (Lowpass 200Hz + Notch)
             const bassFilter = this.audioCtx.createBiquadFilter();
             bassFilter.type = 'lowpass';
             bassFilter.frequency.value = 200;
@@ -162,7 +149,6 @@ class MusicPlayer {
             bassFilter.connect(this.stemGains.bass);
             this.stemGains.bass.connect(masterLimiter);
 
-            // 2. Keyboard / Piano Stem (Dual Peaking/Bandpass 350Hz - 2200Hz)
             const kbFilter = this.audioCtx.createBiquadFilter();
             kbFilter.type = 'bandpass';
             kbFilter.frequency.value = 950;
@@ -172,7 +158,6 @@ class MusicPlayer {
             kbFilter.connect(this.stemGains.keyboard);
             this.stemGains.keyboard.connect(masterLimiter);
 
-            // 3. Vocals Stem (Highpass 1100Hz + Peaking 2500Hz)
             const vocalFilter = this.audioCtx.createBiquadFilter();
             vocalFilter.type = 'highpass';
             vocalFilter.frequency.value = 1100;
@@ -181,7 +166,6 @@ class MusicPlayer {
             vocalFilter.connect(this.stemGains.vocals);
             this.stemGains.vocals.connect(masterLimiter);
 
-            // 4. Drums / Beats Stem (Highpass 4000Hz + Lowpass 12000Hz Transient)
             const drumFilter = this.audioCtx.createBiquadFilter();
             drumFilter.type = 'highpass';
             drumFilter.frequency.value = 4000;
@@ -341,13 +325,16 @@ class MusicPlayer {
         document.getElementById('trackTitle').textContent = trackData.title;
         document.getElementById('displayBpm').textContent = trackData.bpm;
         document.getElementById('displayTimeSig').textContent = trackData.timeSignature;
-        document.getElementById('timeSigDescription').textContent = trackData.timeSigDescription || 'Standard';
+        
+        // Display Indian Taal (Keherwa / Dadra / Rupak)
+        const taalInfo = window.audioAnalyzer.getIndianTaal(trackData.timeSignature);
+        document.getElementById('timeSigDescription').textContent = `${taalInfo.taal} (${taalInfo.beats})`;
 
         const categoryEl = document.getElementById('tempoSpeedCategory');
         if (categoryEl) {
-            if (trackData.bpm < 80) categoryEl.textContent = 'Slow Practice';
-            else if (trackData.bpm > 140) categoryEl.textContent = 'Fast Tempo';
-            else categoryEl.textContent = 'Medium Tempo';
+            if (trackData.bpm < 80) categoryEl.textContent = 'Vilambit (Slow)';
+            else if (trackData.bpm > 140) categoryEl.textContent = 'Drut (Fast)';
+            else categoryEl.textContent = 'Madhyam (Medium)';
         }
 
         this.totalDurationDisplay.textContent = this.formatTime(trackData.duration);
@@ -360,7 +347,7 @@ class MusicPlayer {
     updateTransposeState() {
         if (this.transposeDisplayBadge) {
             if (this.transposeOffset === 0) {
-                this.transposeDisplayBadge.textContent = '0 semitones (Original)';
+                this.transposeDisplayBadge.textContent = '0 semitones (Original Scale Sa)';
                 this.transposeDisplayBadge.className = 'text-sm font-black text-slate-300 bg-slate-800/80 px-2.5 py-0.5 rounded border border-slate-700';
             } else if (this.transposeOffset > 0) {
                 this.transposeDisplayBadge.textContent = `+${this.transposeOffset} semitones`;
@@ -454,14 +441,18 @@ class MusicPlayer {
         const transposedChord = window.audioAnalyzer.transposeChordName(rawChordData.chord, this.transposeOffset);
         const transposedNotes = window.audioAnalyzer.transposeNoteList(rawChordData.notes, this.transposeOffset);
 
+        // Convert to Indian Sargam Notation (Sa Re Ga Ma Pa Dha Ni)
+        const sargamText = window.audioAnalyzer.getSargamSwaras(transposedNotes, this.scaleRoot);
+
         document.getElementById('displayCurrentChord').textContent = transposedChord;
         document.getElementById('bannerChordName').textContent = transposedChord;
 
-        const quality = transposedChord.includes('m') ? 'Minor' : (transposedChord.includes('7') ? 'Dominant 7th' : 'Major');
+        const quality = transposedChord.includes('m') ? 'Minor (Komal)' : (transposedChord.includes('7') ? '7th (Saptak)' : 'Major (Shuddha)');
         document.getElementById('chordQualityBadge').textContent = quality;
 
         const notesText = transposedNotes.join(' - ');
-        document.getElementById('bannerChordNotes').textContent = `[${notesText}]`;
+        document.getElementById('displayChordNotes').textContent = `${notesText} (${sargamText})`;
+        document.getElementById('bannerChordNotes').textContent = `[${notesText}] • ${sargamText}`;
 
         if (window.pianoVisualizer) {
             window.pianoVisualizer.highlightChord(transposedChord, transposedNotes);
@@ -472,22 +463,24 @@ class MusicPlayer {
         if (!this.timelineContainer) return;
         this.timelineContainer.innerHTML = '';
 
-        document.getElementById('chordCountBadge').textContent = `${timeline.length} Chords Detected`;
+        document.getElementById('chordCountBadge').textContent = `${timeline.length} Chords & Sargam Swaras`;
 
         timeline.forEach((item, index) => {
             const transposedChord = window.audioAnalyzer.transposeChordName(item.chord, this.transposeOffset);
             const transposedNotes = window.audioAnalyzer.transposeNoteList(item.notes, this.transposeOffset);
+            const sargamText = window.audioAnalyzer.getSargamSwaras(transposedNotes, this.scaleRoot);
 
             const block = document.createElement('button');
-            block.className = `chord-block flex-shrink-0 flex flex-col items-center justify-center p-3.5 min-w-[95px] rounded-2xl border transition-all cursor-pointer ${
-                index === this.activeChordIndex ? 'bg-blue-600/30 border-blue-500 text-blue-200 shadow-lg shadow-blue-500/20 scale-105' : 'bg-slate-900/90 border-slate-800 text-slate-300 hover:border-slate-700'
+            block.className = `chord-block flex-shrink-0 flex flex-col items-center justify-center p-3.5 min-w-[105px] rounded-2xl border transition-all cursor-pointer ${
+                index === this.activeChordIndex ? 'bg-blue-600/30 border-blue-500 text-blue-200 shadow-lg shadow-blue-500/20 scale-105' : 'bg-[#111827]/90 border-slate-800 text-slate-300 hover:border-slate-700'
             }`;
             block.dataset.index = index;
 
             block.innerHTML = `
                 <span class="text-[11px] font-mono text-slate-400">${this.formatTime(item.time)}</span>
                 <span class="text-xl font-black text-emerald-400 mt-1">${transposedChord}</span>
-                <span class="text-[10px] text-slate-400 font-mono mt-0.5">${transposedNotes.join(' ')}</span>
+                <span class="text-[11px] font-bold text-amber-300 mt-0.5">${sargamText}</span>
+                <span class="text-[9px] text-slate-400 font-mono mt-0.5">${transposedNotes.join(' ')}</span>
             `;
 
             block.addEventListener('click', () => {
@@ -504,13 +497,12 @@ class MusicPlayer {
         const blocks = this.timelineContainer.querySelectorAll('.chord-block');
         blocks.forEach((blk, i) => {
             if (i === index) {
-                blk.className = 'chord-block flex-shrink-0 flex flex-col items-center justify-center p-3.5 min-w-[95px] rounded-2xl border transition-all cursor-pointer bg-blue-600/30 border-blue-500 text-blue-200 shadow-lg shadow-blue-500/20 scale-105 ring-1 ring-blue-400/50';
+                blk.className = 'chord-block flex-shrink-0 flex flex-col items-center justify-center p-3.5 min-w-[105px] rounded-2xl border transition-all cursor-pointer bg-blue-600/30 border-blue-500 text-blue-200 shadow-lg shadow-blue-500/20 scale-105 ring-1 ring-blue-400/50';
                 
-                // Scroll ONLY the timeline container horizontally - NEVER hijack main window scroll!
                 const targetLeft = blk.offsetLeft - (this.timelineContainer.clientWidth / 2) + (blk.clientWidth / 2);
                 this.timelineContainer.scrollTo({ left: targetLeft, behavior: 'smooth' });
             } else {
-                blk.className = 'chord-block flex-shrink-0 flex flex-col items-center justify-center p-3.5 min-w-[95px] rounded-2xl border transition-all cursor-pointer bg-slate-900/90 border-slate-800 text-slate-300 hover:border-slate-700';
+                blk.className = 'chord-block flex-shrink-0 flex flex-col items-center justify-center p-3.5 min-w-[105px] rounded-2xl border transition-all cursor-pointer bg-[#111827]/90 border-slate-800 text-slate-300 hover:border-slate-700';
             }
         });
     }

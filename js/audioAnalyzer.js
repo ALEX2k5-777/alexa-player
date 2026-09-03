@@ -1,7 +1,7 @@
 /**
- * Alexa Player - Advanced Audio Analyzer Engine with Transposition Helpers
+ * Alexa Player - Advanced Audio Analyzer Engine with Transposition & Indian Sargam (Sa Re Ga Ma) Notation
  * Uses Real Web Audio API 4096-point FFT Decibel Spectrum Analysis & Pitch Class Profiling (Chromagram)
- * to accurately detect Tempo (BPM), Time Signature, Keys, and Chords.
+ * to accurately detect Tempo (BPM), Time Signature, Keys, Chords, and Indian Sargam Swaras.
  */
 
 class AudioAnalyzer {
@@ -9,6 +9,24 @@ class AudioAnalyzer {
         this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         this.NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+        // Indian Sargam Swara Mapping relative to Scale Root (Sa)
+        this.SARGAM_SWARAS = [
+            'Sa',        // 0 semitones (Root)
+            're (re)',   // 1 semitone (Komal Re)
+            'Re',        // 2 semitones (Shuddha Re)
+            'ga (ga)',   // 3 semitones (Komal Ga)
+            'Ga',        // 4 semitones (Shuddha Ga)
+            'Ma',        // 5 semitones (Shuddha Ma)
+            'Ma\' (tM)', // 6 semitones (Teevra Ma)
+            'Pa',        // 7 semitones (Pancham)
+            'dha (dha)', // 8 semitones (Komal Dha)
+            'Dha',       // 9 semitones (Shuddha Dha)
+            { swara: 'ni (ni)' }, // 10 semitones (Komal Ni)
+            'Ni'         // 11 semitones (Shuddha Ni)
+        ];
+
+        this.SARGAM_NAMES = ['Sa', 're', 'Re', 'ga', 'Ga', 'Ma', 'tM', 'Pa', 'dha', 'Dha', 'ni', 'Ni'];
 
         // Complete set of 24 Chromatic Chord Pitch Class Profile (PCP) Templates
         this.CHORD_TEMPLATES = {
@@ -38,7 +56,6 @@ class AudioAnalyzer {
             'Bm':    [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1]
         };
 
-        // Note mapping for Beginner Keyboard visualizer
         this.CHORD_NOTES = {
             'C': ['C4', 'E4', 'G4'],   'Cm': ['C4', 'D#4', 'G4'],
             'C#': ['C#4', 'F4', 'G#4'], 'C#m': ['C#4', 'E4', 'G#4'],
@@ -56,8 +73,39 @@ class AudioAnalyzer {
     }
 
     /**
-     * Transpose a single note name (e.g. C4 + 2 semitones -> D4)
+     * Convert Western Note list to Indian Sargam Swaras (Sa Re Ga Ma Pa Dha Ni)
+     * relative to Scale Root (default C = Sa)
      */
+    getSargamSwaras(noteList, scaleRoot = 'C') {
+        if (!noteList || noteList.length === 0) return 'Sa - Ga - Pa';
+        const rootIndex = this.NOTE_NAMES.indexOf(scaleRoot.replace(/\d/, ''));
+        const validRootIdx = rootIndex !== -1 ? rootIndex : 0;
+
+        const swaras = noteList.map(noteStr => {
+            const cleanNote = noteStr.replace(/\d/, '');
+            const noteIdx = this.NOTE_NAMES.indexOf(cleanNote);
+            if (noteIdx === -1) return 'Sa';
+            const interval = (noteIdx - validRootIdx + 12) % 12;
+            return this.SARGAM_NAMES[interval];
+        });
+
+        return swaras.join(' - ');
+    }
+
+    /**
+     * Get Indian Taal Name corresponding to Time Signature
+     */
+    getIndianTaal(timeSig) {
+        if (timeSig === '4/4' || timeSig === '2/4') {
+            return { taal: 'Keherwa Taal (Kaherva)', beats: '4/4 or 8 Beats (Bollywood / Filmi)' };
+        } else if (timeSig === '3/4' || timeSig === '6/8') {
+            return { taal: 'Dadra Taal', beats: '3/4 or 6 Beats (Folk / Garba / Bhajan)' };
+        } else if (timeSig === '7/8') {
+            return { taal: 'Rupak Taal', beats: '7 Beats (3+2+2 Semi-Classical)' };
+        }
+        return { taal: 'Keherwa Taal', beats: 'Common Rhythm' };
+    }
+
     transposeNote(noteStr, semitones) {
         if (!noteStr || semitones === 0) return noteStr;
         const match = noteStr.match(/^([A-G][#b]?)(\d)?$/);
@@ -66,7 +114,6 @@ class AudioAnalyzer {
         let noteName = match[1];
         let octave = match[2] ? parseInt(match[2], 10) : 4;
 
-        // Standardize flat to sharp
         const flatMap = { 'Db': 'C#', 'Eb': 'D#', 'Gb': 'F#', 'Ab': 'G#', 'Bb': 'A#' };
         if (flatMap[noteName]) noteName = flatMap[noteName];
 
@@ -86,9 +133,6 @@ class AudioAnalyzer {
         return `${this.NOTE_NAMES[newIndex]}${octave}`;
     }
 
-    /**
-     * Transpose a chord name (e.g. "Am" + 2 semitones -> "Bm")
-     */
     transposeChordName(chordStr, semitones) {
         if (!chordStr || semitones === 0) return chordStr;
         const match = chordStr.match(/^([A-G][#b]?)(.*)$/);
@@ -107,17 +151,11 @@ class AudioAnalyzer {
         return `${this.NOTE_NAMES[newIndex]}${quality}`;
     }
 
-    /**
-     * Transpose a full note array
-     */
     transposeNoteList(notes, semitones) {
         if (!notes || semitones === 0) return notes;
         return notes.map(n => this.transposeNote(n, semitones));
     }
 
-    /**
-     * Main Entry point for audio processing
-     */
     async analyzeAudioFile(file, onProgress = null) {
         if (onProgress) onProgress(10, 'Reading audio file...');
         const arrayBuffer = await file.arrayBuffer();
@@ -204,7 +242,7 @@ class AudioAnalyzer {
         const totalBeats = Math.floor(pcm.length / samplesPerBeat);
 
         if (totalBeats < 8) {
-            return { signature: '4/4', description: 'Common Time (4 Beats)' };
+            return { signature: '4/4', description: 'Keherwa Taal (4/4 Beats)' };
         }
 
         const beatEnergies = new Float32Array(totalBeats);
@@ -219,11 +257,11 @@ class AudioAnalyzer {
         }
 
         const meterCandidates = [
-            { sig: '4/4', period: 4, desc: 'Common Time (4 Beats)' },
-            { sig: '3/4', period: 3, desc: 'Waltz Time (3 Beats)' },
-            { sig: '2/4', period: 2, desc: 'March Time (2 Beats)' },
-            { sig: '6/8', period: 6, desc: 'Compound Time (6 Beats)' },
-            { sig: '7/8', period: 7, desc: 'Odd Meter (7 Beats)' }
+            { sig: '4/4', period: 4, desc: 'Keherwa Taal (4/4 Beats)' },
+            { sig: '3/4', period: 3, desc: 'Dadra Taal (3/4 Beats)' },
+            { sig: '2/4', period: 2, desc: 'March / Keherwa (2 Beats)' },
+            { sig: '6/8', period: 6, desc: 'Dadra / Garba (6 Beats)' },
+            { sig: '7/8', period: 7, desc: 'Rupak Taal (7 Beats)' }
         ];
 
         let bestScore = -1;
