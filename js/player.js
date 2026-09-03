@@ -1,7 +1,7 @@
 /**
- * Alexa Player Pro - Music Player, Transposer, Sargam Swara Engine & 4-Channel AI Stem Mixer
+ * Alexa Player Pro - Smart Indian Audio Player, Transposer & Sargam Engine
  * Manages audio playback, practice speed, transpose shifting, Indian Sargam (Sa Re Ga Ma) Swaras,
- * Indian Taal recognition (Keherwa, Dadra, Rupak), and 4-channel Web Audio DSP Stem Mixing.
+ * Indian Scale Root (Safed 1 to 7, Kali 1 to 5), Indian Taals (Keherwa, Dadra, Rupak), and 4-channel Web Audio DSP.
  */
 
 class MusicPlayer {
@@ -12,7 +12,7 @@ class MusicPlayer {
         this.activeChordIndex = -1;
         this.loopEnabled = false;
         this.transposeOffset = 0;
-        this.scaleRoot = 'C'; // Scale 1 = Sa (Default C)
+        this.scaleRoot = 'C'; // Default Safed 1 (C)
 
         this.audioCtx = null;
         this.sourceNode = null;
@@ -36,6 +36,7 @@ class MusicPlayer {
         this.transposeDownBtn = document.getElementById('transposeDownBtn');
         this.transposeResetBtn = document.getElementById('transposeResetBtn');
         this.transposeDisplayBadge = document.getElementById('transposeDisplayBadge');
+        this.scaleSaSelector = document.getElementById('scaleSaSelector');
 
         this.currentTimeDisplay = document.getElementById('currentTimeDisplay');
         this.totalDurationDisplay = document.getElementById('totalDurationDisplay');
@@ -83,6 +84,13 @@ class MusicPlayer {
                 this.loopEnabled = !this.loopEnabled;
                 this.loopToggleBtn.classList.toggle('bg-blue-600', this.loopEnabled);
                 this.loopToggleBtn.classList.toggle('text-white', this.loopEnabled);
+            });
+        }
+
+        if (this.scaleSaSelector) {
+            this.scaleSaSelector.addEventListener('change', (e) => {
+                this.scaleRoot = e.target.value;
+                this.updateTransposeState();
             });
         }
 
@@ -316,6 +324,16 @@ class MusicPlayer {
         this.currentTrack = trackData;
         this.transposeOffset = 0;
         
+        // Auto-detect initial scale root (Sa) from first detected chord
+        if (trackData.chordsTimeline && trackData.chordsTimeline.length > 0) {
+            const firstChord = trackData.chordsTimeline[0].chord;
+            const rootNote = firstChord.replace(/m|maj|min|dim|aug|sus|7|9/g, '').trim();
+            if (rootNote) {
+                this.scaleRoot = rootNote;
+                if (this.scaleSaSelector) this.scaleSaSelector.value = rootNote;
+            }
+        }
+        
         const objectUrl = URL.createObjectURL(audioFile);
         this.audio.src = objectUrl;
         this.audio.playbackRate = parseFloat(this.speedSelector ? this.speedSelector.value : 1.0);
@@ -326,7 +344,6 @@ class MusicPlayer {
         document.getElementById('displayBpm').textContent = trackData.bpm;
         document.getElementById('displayTimeSig').textContent = trackData.timeSignature;
         
-        // Display Indian Taal (Keherwa / Dadra / Rupak)
         const taalInfo = window.audioAnalyzer.getIndianTaal(trackData.timeSignature);
         document.getElementById('timeSigDescription').textContent = `${taalInfo.taal} (${taalInfo.beats})`;
 
@@ -347,14 +364,14 @@ class MusicPlayer {
     updateTransposeState() {
         if (this.transposeDisplayBadge) {
             if (this.transposeOffset === 0) {
-                this.transposeDisplayBadge.textContent = '0 semitones (Original Scale Sa)';
-                this.transposeDisplayBadge.className = 'text-sm font-black text-slate-300 bg-slate-800/80 px-2.5 py-0.5 rounded border border-slate-700';
+                this.transposeDisplayBadge.textContent = '0 st';
+                this.transposeDisplayBadge.className = 'text-xs font-black text-slate-300 bg-slate-800/80 px-2 py-1 rounded border border-slate-700';
             } else if (this.transposeOffset > 0) {
-                this.transposeDisplayBadge.textContent = `+${this.transposeOffset} semitones`;
-                this.transposeDisplayBadge.className = 'text-sm font-black text-emerald-300 bg-emerald-500/10 px-2.5 py-0.5 rounded border border-emerald-500/30';
+                this.transposeDisplayBadge.textContent = `+${this.transposeOffset} st`;
+                this.transposeDisplayBadge.className = 'text-xs font-black text-emerald-300 bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/30';
             } else {
-                this.transposeDisplayBadge.textContent = `${this.transposeOffset} semitones`;
-                this.transposeDisplayBadge.className = 'text-sm font-black text-blue-300 bg-blue-500/10 px-2.5 py-0.5 rounded border border-blue-500/30';
+                this.transposeDisplayBadge.textContent = `${this.transposeOffset} st`;
+                this.transposeDisplayBadge.className = 'text-xs font-black text-blue-300 bg-blue-500/10 px-2 py-1 rounded border border-blue-500/30';
             }
         }
 
@@ -441,7 +458,6 @@ class MusicPlayer {
         const transposedChord = window.audioAnalyzer.transposeChordName(rawChordData.chord, this.transposeOffset);
         const transposedNotes = window.audioAnalyzer.transposeNoteList(rawChordData.notes, this.transposeOffset);
 
-        // Convert to Indian Sargam Notation (Sa Re Ga Ma Pa Dha Ni)
         const sargamText = window.audioAnalyzer.getSargamSwaras(transposedNotes, this.scaleRoot);
 
         document.getElementById('displayCurrentChord').textContent = transposedChord;
@@ -478,8 +494,8 @@ class MusicPlayer {
 
             block.innerHTML = `
                 <span class="text-[11px] font-mono text-slate-400">${this.formatTime(item.time)}</span>
-                <span class="text-xl font-black text-emerald-400 mt-1">${transposedChord}</span>
-                <span class="text-[11px] font-bold text-amber-300 mt-0.5">${sargamText}</span>
+                <span class="text-xl font-black text-amber-400 mt-1">${transposedChord}</span>
+                <span class="text-[11px] font-bold text-emerald-300 mt-0.5">${sargamText}</span>
                 <span class="text-[9px] text-slate-400 font-mono mt-0.5">${transposedNotes.join(' ')}</span>
             `;
 
