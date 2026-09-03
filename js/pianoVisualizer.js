@@ -8,7 +8,7 @@ class PianoVisualizer {
         this.container = document.getElementById(containerId);
         this.synthCtx = null;
         
-        // Octaves to render (F3 to E6 gives 3 full octaves, perfect for desktop display)
+        // Octaves to render (3, 4, 5 gives 3 full octaves, perfect for desktop & mobile display)
         this.OCTAVES = [3, 4, 5];
         this.WHITE_NOTES = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
         this.BLACK_NOTES = [
@@ -99,14 +99,14 @@ class PianoVisualizer {
 
         if (!chordNotes || chordNotes.length === 0) return;
 
-        // Determine root note (e.g., 'C' from 'C' or 'Cmaj7', 'A' from 'Am')
-        const rootNoteName = chordName.replace(/m|maj|min|dim|aug|sus|7|9|11|13/g, '').trim();
+        // Determine root note (e.g., 'C' from 'C' or 'Cmaj7', 'F#' from 'F#m')
+        const rootMatch = String(chordName).match(/^([A-G][#b]?)/);
+        const rootNoteName = rootMatch ? rootMatch[1] : 'C';
 
         chordNotes.forEach((fullNote, index) => {
             // Find key match or octave match
             let targetKey = this.renderedKeys.get(fullNote);
             if (!targetKey) {
-                // Try octave 4 or 3 fallback if exact octave not found
                 const baseNote = fullNote.replace(/\d/, '');
                 targetKey = this.renderedKeys.get(`${baseNote}4`) || this.renderedKeys.get(`${baseNote}3`) || this.renderedKeys.get(`${baseNote}5`);
             }
@@ -166,7 +166,6 @@ class PianoVisualizer {
         const semitone = notes.indexOf(noteName);
         if (semitone === -1) return 440;
         
-        // A4 = 440Hz is semitone 57 from C0
         const midiNum = (octave + 1) * 12 + semitone;
         return 440 * Math.pow(2, (midiNum - 69) / 12);
     }
