@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alexa Player - Professional Audio Analyzer, Stem Separator & Keyboard Guide</title>
+    <title>Alexa Player Pro - Smart Audio Analyzer & Beginner Keyboard Guide</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -36,10 +36,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@tonaljs/tonal/browser/tonal.min.js"></script>
     <link rel="stylesheet" href="css/styles.css">
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-blue-500 selection:text-white">
+<body class="bg-[#0b0f19] text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-blue-500 selection:text-white">
 
     <!-- Top Header -->
-    <header class="border-b border-slate-800/80 bg-slate-900/90 backdrop-blur-lg sticky top-0 z-50 shadow-md shadow-black/40">
+    <header class="border-b border-slate-800/80 bg-[#0f172a]/90 backdrop-blur-lg sticky top-0 z-50 shadow-md shadow-black/40">
         <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/25 ring-1 ring-white/20">
@@ -50,9 +50,9 @@
                         <h1 class="text-xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-200 to-purple-300">
                             Alexa Player Pro
                         </h1>
-                        <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full">AI Stem Splitter</span>
+                        <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full">AI Keyboard Suite</span>
                     </div>
-                    <p class="text-xs text-slate-400">Audio Spectrum Analyzer • Instrument Stem Separator • Real-Time Key Transposer</p>
+                    <p class="text-xs text-slate-400">Audio Spectrum Analyzer • Auto Chord Detection • Real-Time Key Transposer</p>
                 </div>
             </div>
             
@@ -70,31 +70,31 @@
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col gap-6">
 
         <!-- Initial Upload Dropzone -->
-        <div id="dropzone" class="border-2 border-dashed border-slate-800 hover:border-blue-500 bg-slate-900/50 hover:bg-slate-900/80 rounded-3xl p-14 text-center flex flex-col items-center justify-center gap-5 transition-all duration-300 cursor-pointer group shadow-2xl">
+        <div id="dropzone" class="border-2 border-dashed border-slate-800 hover:border-blue-500 bg-[#111827]/70 hover:bg-[#111827] rounded-3xl p-14 text-center flex flex-col items-center justify-center gap-5 transition-all duration-300 cursor-pointer group shadow-2xl">
             <div class="w-20 h-20 rounded-2xl bg-gradient-to-tr from-slate-800 to-slate-900 group-hover:from-blue-600/20 group-hover:to-indigo-600/20 text-slate-400 group-hover:text-blue-400 flex items-center justify-center transition-all duration-300 shadow-inner ring-1 ring-white/5 group-hover:scale-110">
                 <i data-lucide="file-audio" class="w-10 h-10"></i>
             </div>
             <div>
                 <h3 class="text-xl font-bold text-slate-100">Upload your Audio Track (MP3, WAV, M4A)</h3>
-                <p class="text-sm text-slate-400 mt-1 max-w-md mx-auto">Drag & drop your song file here. The AI engine will separate instrument stems, detect Tempo, Chords & Keyboard Fingerings.</p>
+                <p class="text-sm text-slate-400 mt-1 max-w-md mx-auto">Drag & drop your song file here. The AI engine will analyze Tempo, Time Signature, Chords & Keyboard Fingerings.</p>
             </div>
             <div class="flex flex-wrap justify-center gap-2 text-xs text-slate-400 mt-2">
-                <span class="px-3 py-1 bg-slate-800/80 border border-slate-700/60 rounded-lg flex items-center gap-1.5"><i data-lucide="layers" class="w-3.5 h-3.5 text-purple-400"></i> AI Instrument Stem Splitter</span>
                 <span class="px-3 py-1 bg-slate-800/80 border border-slate-700/60 rounded-lg flex items-center gap-1.5"><i data-lucide="activity" class="w-3.5 h-3.5 text-blue-400"></i> Auto BPM Detection</span>
+                <span class="px-3 py-1 bg-slate-800/80 border border-slate-700/60 rounded-lg flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5 text-indigo-400"></i> Time Signature</span>
                 <span class="px-3 py-1 bg-slate-800/80 border border-slate-700/60 rounded-lg flex items-center gap-1.5"><i data-lucide="piano" class="w-3.5 h-3.5 text-emerald-400"></i> Live Key Transposer</span>
             </div>
         </div>
 
         <!-- Processing Loading Indicator -->
-        <div id="analysisLoader" class="hidden bg-slate-900/90 border border-slate-800 rounded-3xl p-12 text-center flex-col items-center justify-center gap-5 backdrop-blur-md shadow-2xl">
+        <div id="analysisLoader" class="hidden bg-[#111827]/90 border border-slate-800 rounded-3xl p-12 text-center flex-col items-center justify-center gap-5 backdrop-blur-md shadow-2xl">
             <div class="relative w-20 h-20">
                 <div class="absolute inset-0 rounded-full border-4 border-slate-800"></div>
                 <div class="absolute inset-0 rounded-full border-4 border-blue-500 border-t-transparent animate-spin"></div>
                 <i data-lucide="disc" class="w-10 h-10 text-blue-400 absolute inset-0 m-auto animate-pulse"></i>
             </div>
             <div>
-                <h4 class="text-xl font-bold text-slate-100">Analyzing Song & Splitting Instrument Stems...</h4>
-                <p id="analysisStatusText" class="text-sm text-slate-400 mt-1">Isolating Vocals, Keyboard/Piano, Bass, and Drums Stems</p>
+                <h4 class="text-xl font-bold text-slate-100">Analyzing Song Audio...</h4>
+                <p id="analysisStatusText" class="text-sm text-slate-400 mt-1">Extracting 4096-point FFT Pitch Class Chromagram & Beat Onsets</p>
             </div>
             <div class="w-80 h-2.5 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700/50">
                 <div id="analysisProgressBar" class="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-full w-0 transition-all duration-300"></div>
@@ -108,7 +108,7 @@
             <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
                 
                 <!-- Tempo / BPM Card -->
-                <div class="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-4 flex items-center gap-3.5 relative overflow-hidden group shadow-lg backdrop-blur-sm hover:border-slate-700 transition">
+                <div class="bg-[#111827]/90 border border-slate-800/80 rounded-2xl p-4 flex items-center gap-3.5 relative overflow-hidden group shadow-lg backdrop-blur-sm hover:border-slate-700 transition">
                     <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center shrink-0">
                         <i data-lucide="activity" class="w-6 h-6" id="bpmPulseIcon"></i>
                     </div>
@@ -125,7 +125,7 @@
                 </div>
 
                 <!-- Time Signature Card -->
-                <div class="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-4 flex items-center gap-3.5 relative overflow-hidden group shadow-lg backdrop-blur-sm hover:border-slate-700 transition">
+                <div class="bg-[#111827]/90 border border-slate-800/80 rounded-2xl p-4 flex items-center gap-3.5 relative overflow-hidden group shadow-lg backdrop-blur-sm hover:border-slate-700 transition">
                     <div class="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center shrink-0">
                         <i data-lucide="clock" class="w-6 h-6"></i>
                     </div>
@@ -139,7 +139,7 @@
                 </div>
 
                 <!-- Active Transposed Chord Card -->
-                <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950/40 border border-emerald-500/30 rounded-2xl p-4 flex items-center gap-3.5 relative overflow-hidden group shadow-lg shadow-emerald-950/20 backdrop-blur-sm">
+                <div class="bg-gradient-to-br from-[#111827] via-[#111827] to-blue-950/40 border border-emerald-500/30 rounded-2xl p-4 flex items-center gap-3.5 relative overflow-hidden group shadow-lg shadow-emerald-950/20 backdrop-blur-sm">
                     <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0">
                         <i data-lucide="music-4" class="w-6 h-6"></i>
                     </div>
@@ -153,7 +153,7 @@
                 </div>
 
                 <!-- Transpose Controls Card -->
-                <div class="col-span-2 lg:col-span-2 bg-slate-900/90 border border-slate-800/80 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-lg backdrop-blur-sm">
+                <div class="col-span-2 lg:col-span-2 bg-[#111827]/90 border border-slate-800/80 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-lg backdrop-blur-sm">
                     <div class="flex items-center gap-3">
                         <div class="w-11 h-11 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 flex items-center justify-center shrink-0">
                             <i data-lucide="sliders-horizontal" class="w-5 h-5"></i>
@@ -182,8 +182,87 @@
 
             </div>
 
+            <!-- Waveform & Music Player Controls Container -->
+            <div class="bg-[#111827]/90 border border-slate-800 rounded-3xl p-6 flex flex-col gap-5 shadow-2xl backdrop-blur-md">
+                <!-- Track info header -->
+                <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
+                            <i data-lucide="disc-3" class="w-5 h-5 animate-spin-slow"></i>
+                        </div>
+                        <div>
+                            <h2 id="trackTitle" class="text-base font-bold text-slate-100">Loaded Song Track</h2>
+                            <p id="trackMeta" class="text-xs text-slate-400">Audio File Ready • High Precision MIR FFT Loaded</p>
+                        </div>
+                    </div>
+
+                    <!-- Speed & Loop Practice Controls -->
+                    <div class="flex items-center gap-3">
+                        <!-- Playback Speed Selector for Practice -->
+                        <div class="flex items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700/80 text-xs">
+                            <i data-lucide="gauge" class="w-3.5 h-3.5 text-blue-400"></i>
+                            <span class="text-slate-300 font-semibold">Speed:</span>
+                            <select id="speedSelector" class="bg-[#0b0f19] text-blue-400 font-bold px-2 py-0.5 rounded border border-slate-700 focus:outline-none cursor-pointer">
+                                <option value="0.5">0.50x (Slow)</option>
+                                <option value="0.75">0.75x (Practice)</option>
+                                <option value="1.0" selected>1.00x (Normal)</option>
+                                <option value="1.25">1.25x (Fast)</option>
+                            </select>
+                        </div>
+
+                        <!-- Loop Practice Mode Toggle -->
+                        <button id="loopToggleBtn" class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold border border-slate-700/80 transition active:scale-95">
+                            <i data-lucide="repeat" class="w-3.5 h-3.5"></i>
+                            <span>Loop Measure</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Interactive Waveform & Spectrum Visualizer Container -->
+                <div class="relative bg-[#050811] rounded-2xl p-3 border border-slate-800/90 shadow-inner">
+                    <canvas id="waveformCanvas" class="w-full h-24 rounded-lg cursor-pointer"></canvas>
+                    <div class="flex justify-between items-center text-xs text-slate-400 mt-2 px-1 font-mono">
+                        <span id="currentTimeDisplay" class="font-bold text-blue-400">0:00</span>
+                        <span id="totalDurationDisplay" class="text-slate-500">0:00</span>
+                    </div>
+                </div>
+
+                <!-- Main Player Control Bar -->
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <button id="rewindBtn" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition border border-slate-700 active:scale-95" title="Rewind 5s">
+                            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                        </button>
+
+                        <button id="playPauseBtn" class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white flex items-center justify-center shadow-xl shadow-blue-600/30 transition transform active:scale-95 ring-1 ring-white/20">
+                            <i data-lucide="play" class="w-7 h-7 fill-current ml-0.5" id="playIcon"></i>
+                            <i data-lucide="pause" class="w-7 h-7 fill-current hidden" id="pauseIcon"></i>
+                        </button>
+
+                        <button id="forwardBtn" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition border border-slate-700 active:scale-95" title="Forward 5s">
+                            <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+
+                    <!-- Live Transposed Active Chord Banner -->
+                    <div class="flex items-center gap-3 bg-[#050811] px-5 py-2.5 rounded-2xl border border-emerald-500/30 shadow-inner">
+                        <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Active Key Fingerings:</span>
+                        <span id="bannerChordName" class="text-2xl font-black text-emerald-400">C</span>
+                        <span id="bannerChordNotes" class="text-xs font-mono text-emerald-200/90 bg-emerald-950/60 px-2 py-1 rounded border border-emerald-500/20">[C4, E4, G4]</span>
+                    </div>
+
+                    <!-- Volume Control -->
+                    <div class="flex items-center gap-2 text-slate-400 bg-slate-800/50 px-3 py-2 rounded-xl border border-slate-800">
+                        <button id="muteBtn" class="hover:text-slate-200 transition">
+                            <i data-lucide="volume-2" class="w-5 h-5 text-slate-300" id="volumeIcon"></i>
+                        </button>
+                        <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.9" class="w-20 accent-blue-500 cursor-pointer">
+                    </div>
+                </div>
+            </div>
+
             <!-- AI Multi-Track Instrument Stem Separator Mixer -->
-            <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 flex flex-col gap-4 shadow-2xl backdrop-blur-md">
+            <div class="bg-[#111827]/90 border border-slate-800 rounded-3xl p-6 flex flex-col gap-4 shadow-2xl backdrop-blur-md">
                 <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800/80 pb-3">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 flex items-center justify-center">
@@ -211,7 +290,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
                     
                     <!-- 1. Vocals Channel -->
-                    <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 flex flex-col gap-3">
+                    <div class="bg-[#050811]/90 border border-slate-800 rounded-2xl p-4 flex flex-col gap-3">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-2 text-pink-400 font-bold text-sm">
                                 <i data-lucide="mic" class="w-4 h-4"></i>
@@ -229,7 +308,7 @@
                     </div>
 
                     <!-- 2. Keyboard / Piano Channel -->
-                    <div class="bg-slate-950/80 border border-purple-500/30 rounded-2xl p-4 flex flex-col gap-3 bg-gradient-to-b from-purple-950/10 to-transparent">
+                    <div class="bg-[#050811]/90 border border-purple-500/30 rounded-2xl p-4 flex flex-col gap-3 bg-gradient-to-b from-purple-950/10 to-transparent">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-2 text-purple-400 font-bold text-sm">
                                 <i data-lucide="piano" class="w-4 h-4"></i>
@@ -247,7 +326,7 @@
                     </div>
 
                     <!-- 3. Bass Channel -->
-                    <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 flex flex-col gap-3">
+                    <div class="bg-[#050811]/90 border border-slate-800 rounded-2xl p-4 flex flex-col gap-3">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-2 text-blue-400 font-bold text-sm">
                                 <i data-lucide="volume-2" class="w-4 h-4"></i>
@@ -265,7 +344,7 @@
                     </div>
 
                     <!-- 4. Drums & Percussion Channel -->
-                    <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 flex flex-col gap-3">
+                    <div class="bg-[#050811]/90 border border-slate-800 rounded-2xl p-4 flex flex-col gap-3">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-2 text-amber-400 font-bold text-sm">
                                 <i data-lucide="disc" class="w-4 h-4"></i>
@@ -285,87 +364,8 @@
                 </div>
             </div>
 
-            <!-- Waveform & Music Player Controls Container -->
-            <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 flex flex-col gap-5 shadow-2xl backdrop-blur-md">
-                <!-- Track info header -->
-                <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
-                            <i data-lucide="disc-3" class="w-5 h-5 animate-spin-slow"></i>
-                        </div>
-                        <div>
-                            <h2 id="trackTitle" class="text-base font-bold text-slate-100">Loaded Song Track</h2>
-                            <p id="trackMeta" class="text-xs text-slate-400">Audio File Ready • Multi-Track Stem Mixer Enabled</p>
-                        </div>
-                    </div>
-
-                    <!-- Speed & Loop Practice Controls -->
-                    <div class="flex items-center gap-3">
-                        <!-- Playback Speed Selector for Practice -->
-                        <div class="flex items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700/80 text-xs">
-                            <i data-lucide="gauge" class="w-3.5 h-3.5 text-blue-400"></i>
-                            <span class="text-slate-300 font-semibold">Speed:</span>
-                            <select id="speedSelector" class="bg-slate-900 text-blue-400 font-bold px-2 py-0.5 rounded border border-slate-700 focus:outline-none cursor-pointer">
-                                <option value="0.5">0.50x (Slow)</option>
-                                <option value="0.75">0.75x (Practice)</option>
-                                <option value="1.0" selected>1.00x (Normal)</option>
-                                <option value="1.25">1.25x (Fast)</option>
-                            </select>
-                        </div>
-
-                        <!-- Loop Practice Mode Toggle -->
-                        <button id="loopToggleBtn" class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold border border-slate-700/80 transition active:scale-95">
-                            <i data-lucide="repeat" class="w-3.5 h-3.5"></i>
-                            <span>Loop Measure</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Interactive Waveform & Spectrum Visualizer Container -->
-                <div class="relative bg-slate-950/90 rounded-2xl p-3 border border-slate-800/90 shadow-inner">
-                    <canvas id="waveformCanvas" class="w-full h-24 rounded-lg cursor-pointer"></canvas>
-                    <div class="flex justify-between items-center text-xs text-slate-400 mt-2 px-1 font-mono">
-                        <span id="currentTimeDisplay" class="font-bold text-blue-400">0:00</span>
-                        <span id="totalDurationDisplay" class="text-slate-500">0:00</span>
-                    </div>
-                </div>
-
-                <!-- Main Player Control Bar -->
-                <div class="flex flex-wrap items-center justify-between gap-4">
-                    <div class="flex items-center gap-3">
-                        <button id="rewindBtn" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition border border-slate-700 active:scale-95" title="Rewind 5s">
-                            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-                        </button>
-
-                        <button id="playPauseBtn" class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white flex items-center justify-center shadow-xl shadow-blue-600/30 transition transform active:scale-95 ring-1 ring-white/20">
-                            <i data-lucide="play" class="w-7 h-7 fill-current ml-0.5" id="playIcon"></i>
-                            <i data-lucide="pause" class="w-7 h-7 fill-current hidden" id="pauseIcon"></i>
-                        </button>
-
-                        <button id="forwardBtn" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition border border-slate-700 active:scale-95" title="Forward 5s">
-                            <i data-lucide="rotate-cw" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-
-                    <!-- Live Transposed Active Chord Banner -->
-                    <div class="flex items-center gap-3 bg-slate-950/90 px-5 py-2.5 rounded-2xl border border-emerald-500/30 shadow-inner">
-                        <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Active Key Fingerings:</span>
-                        <span id="bannerChordName" class="text-2xl font-black text-emerald-400">C</span>
-                        <span id="bannerChordNotes" class="text-xs font-mono text-emerald-200/90 bg-emerald-950/60 px-2 py-1 rounded border border-emerald-500/20">[C4, E4, G4]</span>
-                    </div>
-
-                    <!-- Volume Control -->
-                    <div class="flex items-center gap-2 text-slate-400 bg-slate-800/50 px-3 py-2 rounded-xl border border-slate-800">
-                        <button id="muteBtn" class="hover:text-slate-200 transition">
-                            <i data-lucide="volume-2" class="w-5 h-5 text-slate-300" id="volumeIcon"></i>
-                        </button>
-                        <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.9" class="w-20 accent-blue-500 cursor-pointer">
-                    </div>
-                </div>
-            </div>
-
             <!-- Beginner Keyboard Visualizer Section -->
-            <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 flex flex-col gap-4 shadow-2xl backdrop-blur-md">
+            <div class="bg-[#111827]/90 border border-slate-800 rounded-3xl p-6 flex flex-col gap-4 shadow-2xl backdrop-blur-md">
                 <div class="flex flex-wrap items-center justify-between gap-4">
                     <div>
                         <h3 class="text-lg font-bold text-slate-100 flex items-center gap-2">
@@ -388,7 +388,7 @@
                 </div>
 
                 <!-- Interactive SVG / HTML Keyboard Canvas Container -->
-                <div class="relative bg-slate-950/90 p-5 rounded-2xl border border-slate-800 overflow-x-auto shadow-inner">
+                <div class="relative bg-[#050811]/90 p-5 rounded-2xl border border-slate-800 overflow-x-auto shadow-inner">
                     <div id="pianoContainer" class="flex justify-center min-w-[760px] py-3">
                         <!-- Rendered by pianoVisualizer.js -->
                     </div>
@@ -396,7 +396,7 @@
             </div>
 
             <!-- Synchronized Transposed Chord Timeline -->
-            <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 flex flex-col gap-4 shadow-2xl backdrop-blur-md">
+            <div class="bg-[#111827]/90 border border-slate-800 rounded-3xl p-6 flex flex-col gap-4 shadow-2xl backdrop-blur-md">
                 <div class="flex items-center justify-between">
                     <div>
                         <h3 class="text-lg font-bold text-slate-100 flex items-center gap-2">
@@ -410,7 +410,7 @@
                     </span>
                 </div>
 
-                <!-- Scrolling Chord Blocks Container -->
+                <!-- Scrolling Chord Blocks Container (Isolated horizontal scrolling only) -->
                 <div id="chordTimelineContainer" class="flex items-center gap-3.5 overflow-x-auto py-3 px-1 scrollbar-thin">
                     <!-- Dynamic chord blocks loaded here -->
                 </div>
@@ -421,7 +421,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-slate-900 bg-slate-950 py-5 text-center text-xs text-slate-500 mt-auto">
+    <footer class="border-t border-slate-900 bg-[#050811] py-5 text-center text-xs text-slate-500 mt-auto">
         <p>Alexa Player Pro • AI Music Spectrum Analyzer, Instrument Stem Separator & Keyboard Transposer</p>
     </footer>
 

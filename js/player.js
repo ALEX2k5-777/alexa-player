@@ -505,7 +505,10 @@ class MusicPlayer {
         blocks.forEach((blk, i) => {
             if (i === index) {
                 blk.className = 'chord-block flex-shrink-0 flex flex-col items-center justify-center p-3.5 min-w-[95px] rounded-2xl border transition-all cursor-pointer bg-blue-600/30 border-blue-500 text-blue-200 shadow-lg shadow-blue-500/20 scale-105 ring-1 ring-blue-400/50';
-                blk.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                
+                // Scroll ONLY the timeline container horizontally - NEVER hijack main window scroll!
+                const targetLeft = blk.offsetLeft - (this.timelineContainer.clientWidth / 2) + (blk.clientWidth / 2);
+                this.timelineContainer.scrollTo({ left: targetLeft, behavior: 'smooth' });
             } else {
                 blk.className = 'chord-block flex-shrink-0 flex flex-col items-center justify-center p-3.5 min-w-[95px] rounded-2xl border transition-all cursor-pointer bg-slate-900/90 border-slate-800 text-slate-300 hover:border-slate-700';
             }
