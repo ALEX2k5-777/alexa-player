@@ -9,7 +9,6 @@ class AudioAnalyzer {
         this.audioCtx = null;
 
         this.NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-
         this.SARGAM_NAMES = ['Sa', 're', 'Re', 'ga', 'Ga', 'Ma', 'tM', 'Pa', 'dha', 'Dha', 'ni', 'Ni'];
 
         // Complete set of 24 Chromatic Chord Pitch Class Profile (PCP) Templates
@@ -57,7 +56,7 @@ class AudioAnalyzer {
     }
 
     /**
-     * Cross-browser PCM AudioBuffer decoder
+     * Cross-browser PCM AudioBuffer decoder with arrayBuffer slicing to prevent neutering errors
      */
     async decodeAudioBuffer(arrayBuffer) {
         if (!this.audioCtx) {
@@ -67,16 +66,16 @@ class AudioAnalyzer {
             try { await this.audioCtx.resume(); } catch (e) {}
         }
 
+        // Slice arrayBuffer to prevent detached ArrayBuffer DataCloneError in decodeAudioData
+        const bufferCopy = arrayBuffer.slice(0);
+
         return new Promise((resolve, reject) => {
             try {
-                const promise = this.audioCtx.decodeAudioData(
-                    arrayBuffer,
+                this.audioCtx.decodeAudioData(
+                    bufferCopy,
                     (decoded) => resolve(decoded),
-                    (err) => reject(err)
+                    (err) => reject(err || new Error("Failed to decode PCM audio data"))
                 );
-                if (promise && typeof promise.then === 'function') {
-                    promise.then(resolve).catch(reject);
-                }
             } catch (e) {
                 reject(e);
             }
