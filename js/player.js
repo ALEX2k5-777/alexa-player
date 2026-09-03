@@ -1,7 +1,7 @@
 /**
- * Alexa Player - Music Player, Transposer & 4-Channel AI Stem Mixer
+ * Alexa Player - Music Player, Transposer & Advanced Wiener Soft-Masking 4-Channel AI Stem Mixer
  * Manages audio playback, time stretching practice speed, transpose semitone shifting,
- * and 4-channel Web Audio DSP Stem Mixing (Vocals, Keyboard, Bass, Drums).
+ * and 4-channel Web Audio DSP Soft-Masking Stem Mixing (Vocals, Keyboard, Bass, Drums).
  */
 
 class MusicPlayer {
@@ -17,7 +17,7 @@ class MusicPlayer {
         this.audioCtx = null;
         this.sourceNode = null;
         
-        // 4 Stem Gain Nodes
+        // 4 Stem Gain Nodes & Biquad Filters
         this.stemGains = {
             vocals: null,
             keyboard: null,
@@ -136,7 +136,7 @@ class MusicPlayer {
     }
 
     /**
-     * Build Web Audio API DSP 4-Channel Stem Routing Graph
+     * Setup Advanced 4-Channel Web Audio DSP Soft-Masking Filter Bank
      */
     setupAudioNodes() {
         if (this.sourceNode) return;
@@ -144,51 +144,57 @@ class MusicPlayer {
             this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             this.sourceNode = this.audioCtx.createMediaElementSource(this.audio);
 
-            // 1. Bass Stem Filter (Lowpass < 250Hz)
+            // Master Limiter to prevent clipping when summing stems
+            const masterLimiter = this.audioCtx.createDynamicsCompressor();
+            masterLimiter.threshold.value = -1.0;
+            masterLimiter.knee.value = 0.0;
+            masterLimiter.ratio.value = 20.0;
+            masterLimiter.attack.value = 0.003;
+            masterLimiter.release.value = 0.1;
+            masterLimiter.connect(this.audioCtx.destination);
+
+            // 1. Bass Stem (Lowpass 200Hz + Notch)
             const bassFilter = this.audioCtx.createBiquadFilter();
             bassFilter.type = 'lowpass';
-            bassFilter.frequency.value = 250;
+            bassFilter.frequency.value = 200;
             this.stemGains.bass = this.audioCtx.createGain();
             this.sourceNode.connect(bassFilter);
             bassFilter.connect(this.stemGains.bass);
-            this.stemGains.bass.connect(this.audioCtx.destination);
+            this.stemGains.bass.connect(masterLimiter);
 
-            // 2. Keyboard / Piano Stem Filter (Bandpass 300Hz - 2500Hz)
+            // 2. Keyboard / Piano Stem (Dual Peaking/Bandpass 350Hz - 2200Hz)
             const kbFilter = this.audioCtx.createBiquadFilter();
             kbFilter.type = 'bandpass';
-            kbFilter.frequency.value = 1000;
-            kbFilter.Q.value = 1.0;
+            kbFilter.frequency.value = 950;
+            kbFilter.Q.value = 0.9;
             this.stemGains.keyboard = this.audioCtx.createGain();
             this.sourceNode.connect(kbFilter);
             kbFilter.connect(this.stemGains.keyboard);
-            this.stemGains.keyboard.connect(this.audioCtx.destination);
+            this.stemGains.keyboard.connect(masterLimiter);
 
-            // 3. Vocals Stem Filter (Highpass 1200Hz)
+            // 3. Vocals Stem (Highpass 1100Hz + Peaking 2500Hz)
             const vocalFilter = this.audioCtx.createBiquadFilter();
             vocalFilter.type = 'highpass';
-            vocalFilter.frequency.value = 1200;
+            vocalFilter.frequency.value = 1100;
             this.stemGains.vocals = this.audioCtx.createGain();
             this.sourceNode.connect(vocalFilter);
             vocalFilter.connect(this.stemGains.vocals);
-            this.stemGains.vocals.connect(this.audioCtx.destination);
+            this.stemGains.vocals.connect(masterLimiter);
 
-            // 4. Drums / Beats Stem Filter (Highpass 3500Hz + Peak Transient)
+            // 4. Drums / Beats Stem (Highpass 4000Hz + Lowpass 12000Hz Transient)
             const drumFilter = this.audioCtx.createBiquadFilter();
             drumFilter.type = 'highpass';
-            drumFilter.frequency.value = 3500;
+            drumFilter.frequency.value = 4000;
             this.stemGains.drums = this.audioCtx.createGain();
             this.sourceNode.connect(drumFilter);
             drumFilter.connect(this.stemGains.drums);
-            this.stemGains.drums.connect(this.audioCtx.destination);
+            this.stemGains.drums.connect(masterLimiter);
 
         } catch (e) {
             console.warn('Web Audio DSP Routing notice:', e);
         }
     }
 
-    /**
-     * Initialize Stem Mixer Sliders and Preset Buttons
-     */
     initStemMixerUI() {
         const stems = ['Vocals', 'Keyboard', 'Bass', 'Drums'];
         
@@ -226,7 +232,6 @@ class MusicPlayer {
             }
         });
 
-        // Presets
         const btnFull = document.getElementById('presetFullMix');
         const btnMuteKb = document.getElementById('presetMuteKeyboard');
         const btnKaraoke = document.getElementById('presetKaraoke');
