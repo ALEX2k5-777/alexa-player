@@ -1,7 +1,7 @@
 /**
- * Alexa Player Pro - Advanced Audio Analyzer Engine with Chord AI Music Engine & Indian Sargam Swaras
- * Uses Krumhansl-Schmuckler Key Profiler, Diatonic Key Priority Weighting, 4096-point FFT Pitch Class Chromagram,
- * and Indian Sargam (Sa Re Ga Ma Pa Dha Ni) Swaras.
+ * Alexa Player Pro - Advanced Western Audio Analyzer Engine & Chord AI Profiler
+ * Uses Krumhansl-Schmuckler Key Profiling, Diatonic Harmonic Priority Boost, 4096-point FFT Pitch Class Chromagram,
+ * and Standard Western Music Theory (Chords, Notes, Time Signatures).
  */
 
 class AudioAnalyzer {
@@ -9,13 +9,12 @@ class AudioAnalyzer {
         this.audioCtx = null;
 
         this.NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-        this.SARGAM_NAMES = ['Sa', 're', 'Re', 'ga', 'Ga', 'Ma', 'tM', 'Pa', 'dha', 'Dha', 'ni', 'Ni'];
 
-        // Krumhansl-Schmuckler Key Profiles (Chord AI Engine)
+        // Krumhansl-Schmuckler Key Profiles (Western Music Theory Engine)
         this.MAJOR_KEY_PROFILE = [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88];
         this.MINOR_KEY_PROFILE = [6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17];
 
-        // Diatonic Chord Sets from Chord AI Key Profiles
+        // Diatonic Chord Sets for Western Keys
         this.KEY_DIATONIC_CHORDS = {
             'C': ['C', 'Dm', 'Em', 'F', 'G', 'Am', 'Bm'],
             'C#': ['C#', 'D#m', 'Fm', 'F#', 'G#', 'A#m', 'Cm'],
@@ -31,28 +30,33 @@ class AudioAnalyzer {
             'B': ['B', 'C#m', 'D#m', 'E', 'F#', 'G#m', 'A#m']
         };
 
-        // Complete set of Chromatic Chord Pitch Class Profile (PCP) Templates
+        // Complete set of Western Chromatic Chord Pitch Class Profile (PCP) Templates
         this.CHORD_TEMPLATES = {
             'C':     [1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0],
             'Cm':    [1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
+            'C7':    [1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0],
             'C#':    [0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
             'C#m':   [0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
             'D':     [0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0],
             'Dm':    [0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0],
+            'D7':    [1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0],
             'D#':    [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0],
             'D#m':   [0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0],
             'E':     [0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1],
             'Em':    [0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1],
+            'E7':    [0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1],
             'F':     [1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0],
             'Fm':    [1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
             'F#':    [0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0],
             'F#m':   [0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0],
             'G':     [0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1],
             'Gm':    [0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0],
+            'G7':    [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
             'G#':    [1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0],
             'G#m':   [0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1],
             'A':     [0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0],
             'Am':    [1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
+            'Am7':   [1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0],
             'A#':    [0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0],
             'A#m':   [0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0],
             'B':     [0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1],
@@ -60,16 +64,16 @@ class AudioAnalyzer {
         };
 
         this.CHORD_NOTES = {
-            'C': ['C4', 'E4', 'G4'],   'Cm': ['C4', 'D#4', 'G4'],
+            'C': ['C4', 'E4', 'G4'],   'Cm': ['C4', 'D#4', 'G4'],   'C7': ['C4', 'E4', 'G4', 'A#4'],
             'C#': ['C#4', 'F4', 'G#4'], 'C#m': ['C#4', 'E4', 'G#4'],
-            'D': ['D4', 'F#4', 'A4'],  'Dm': ['D4', 'F4', 'A4'],
+            'D': ['D4', 'F#4', 'A4'],  'Dm': ['D4', 'F4', 'A4'],    'D7': ['D4', 'F#4', 'A4', 'C5'],
             'D#': ['D#4', 'G4', 'A#4'], 'D#m': ['D#4', 'F#4', 'A#4'],
-            'E': ['E4', 'G#4', 'B4'],  'Em': ['E4', 'G4', 'B4'],
+            'E': ['E4', 'G#4', 'B4'],  'Em': ['E4', 'G4', 'B4'],    'E7': ['E4', 'G#4', 'B4', 'D5'],
             'F': ['F3', 'A3', 'C4'],   'Fm': ['F3', 'G#3', 'C4'],
             'F#': ['F#3', 'A#3', 'C#4'],'F#m': ['F#3', 'A3', 'C#4'],
-            'G': ['G3', 'B3', 'D4'],   'Gm': ['G3', 'A#3', 'D4'],
+            'G': ['G3', 'B3', 'D4'],   'Gm': ['G3', 'A#3', 'D4'],    'G7': ['G3', 'B3', 'D4', 'F4'],
             'G#': ['G#3', 'C4', 'D#4'], 'G#m': ['G#3', 'B3', 'D#4'],
-            'A': ['A3', 'C#4', 'E4'],  'Am': ['A3', 'C4', 'E4'],
+            'A': ['A3', 'C#4', 'E4'],  'Am': ['A3', 'C4', 'E4'],    'Am7': ['A3', 'C4', 'E4', 'G4'],
             'A#': ['A#3', 'D4', 'F4'], 'A#m': ['A#3', 'C#4', 'F4'],
             'B': ['B3', 'D#4', 'F#4'], 'Bm': ['B3', 'D4', 'F#4']
         };
@@ -114,31 +118,13 @@ class AudioAnalyzer {
         });
     }
 
-    getSargamSwaras(noteList, scaleRoot = 'C') {
-        if (!noteList || noteList.length === 0) return 'Sa - Ga - Pa';
-        const rootIndex = this.NOTE_NAMES.indexOf(scaleRoot.replace(/\d/, ''));
-        const validRootIdx = rootIndex !== -1 ? rootIndex : 0;
-
-        const swaras = noteList.map(noteStr => {
-            const cleanNote = String(noteStr).replace(/\d/, '');
-            const noteIdx = this.NOTE_NAMES.indexOf(cleanNote);
-            if (noteIdx === -1) return 'Sa';
-            const interval = (noteIdx - validRootIdx + 12) % 12;
-            return this.SARGAM_NAMES[interval];
-        });
-
-        return swaras.join(' - ');
-    }
-
-    getIndianTaal(timeSig) {
-        if (timeSig === '4/4' || timeSig === '2/4') {
-            return { taal: 'Keherwa Taal', beats: '4/4 Beats (Bollywood)' };
-        } else if (timeSig === '3/4' || timeSig === '6/8') {
-            return { taal: 'Dadra Taal', beats: '3/4 Beats (Bhajan/Garba)' };
-        } else if (timeSig === '7/8') {
-            return { taal: 'Rupak Taal', beats: '7 Beats (Semi-Classical)' };
-        }
-        return { taal: 'Keherwa Taal', beats: 'Common Rhythm' };
+    getWesternTimeSigDescription(timeSig) {
+        if (timeSig === '4/4') return 'Common Time (4 Beats)';
+        if (timeSig === '3/4') return 'Waltz Time (3 Beats)';
+        if (timeSig === '2/4') return 'March Time (2 Beats)';
+        if (timeSig === '6/8') return 'Compound Time (6 Beats)';
+        if (timeSig === '7/8') return 'Complex Time (7 Beats)';
+        return 'Standard Meter';
     }
 
     transposeNote(noteStr, semitones) {
@@ -273,7 +259,7 @@ class AudioAnalyzer {
     }
 
     detectTimeSignature(audioBuffer, bpm) {
-        if (!audioBuffer) return { signature: '4/4', description: 'Keherwa Taal (4/4 Beats)' };
+        if (!audioBuffer) return { signature: '4/4', description: 'Common Time (4 Beats)' };
         const beatDurationSec = 60 / bpm;
         const pcm = audioBuffer.getChannelData(0);
         const sampleRate = audioBuffer.sampleRate;
@@ -281,7 +267,7 @@ class AudioAnalyzer {
         const totalBeats = Math.floor(pcm.length / samplesPerBeat);
 
         if (totalBeats < 8) {
-            return { signature: '4/4', description: 'Keherwa Taal (4/4 Beats)' };
+            return { signature: '4/4', description: 'Common Time (4 Beats)' };
         }
 
         const beatEnergies = new Float32Array(totalBeats);
@@ -296,11 +282,11 @@ class AudioAnalyzer {
         }
 
         const meterCandidates = [
-            { sig: '4/4', period: 4, desc: 'Keherwa Taal (4/4 Beats)' },
-            { sig: '3/4', period: 3, desc: 'Dadra Taal (3/4 Beats)' },
-            { sig: '2/4', period: 2, desc: 'March / Keherwa (2 Beats)' },
-            { sig: '6/8', period: 6, desc: 'Dadra / Garba (6 Beats)' },
-            { sig: '7/8', period: 7, desc: 'Rupak Taal (7 Beats)' }
+            { sig: '4/4', period: 4, desc: 'Common Time (4 Beats)' },
+            { sig: '3/4', period: 3, desc: 'Waltz Time (3 Beats)' },
+            { sig: '2/4', period: 2, desc: 'March Time (2 Beats)' },
+            { sig: '6/8', period: 6, desc: 'Compound Time (6 Beats)' },
+            { sig: '7/8', period: 7, desc: 'Complex Time (7 Beats)' }
         ];
 
         let bestScore = -1;
@@ -333,7 +319,7 @@ class AudioAnalyzer {
     }
 
     /**
-     * Chord AI Key-Aware Chromagram Extraction Engine
+     * Western Key-Aware Chromagram Extraction Engine
      */
     async extractFFTChordProgression(audioBuffer, bpm, onProgress) {
         if (!audioBuffer) return [];
@@ -392,7 +378,7 @@ class AudioAnalyzer {
 
             if (onProgress && s % 5 === 0) {
                 const progressPct = 85 + Math.floor((s / numSlices) * 8);
-                onProgress(progressPct, `Extracting Chord AI Pitch Class Chromagram (${s + 1}/${numSlices})...`);
+                onProgress(progressPct, `Extracting Western Chromagram (${s + 1}/${numSlices})...`);
             }
         }
 
@@ -458,7 +444,7 @@ class AudioAnalyzer {
             }
             let sim = (normA > 0 && normB > 0) ? dot / (Math.sqrt(normA) * Math.sqrt(normB)) : 0;
             
-            // Chord AI Diatonic Priority Boost
+            // Diatonic Priority Boost
             if (diatonicSet && diatonicSet.has(chordName)) {
                 sim *= 1.25;
             }
