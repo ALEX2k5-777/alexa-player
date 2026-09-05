@@ -1,7 +1,7 @@
 /**
- * Alexa Player Pro - Advanced Audio Analyzer Engine with Indian Sargam (Sa Re Ga Ma) Swaras
- * Uses Real Web Audio API 4096-point FFT Decibel Spectrum Analysis & Pitch Class Profiling (Chromagram)
- * to accurately detect Tempo (BPM), Time Signature, Keys, Chords, and Indian Sargam Swaras.
+ * Alexa Player Pro - Advanced Audio Analyzer Engine with Chord AI Music Engine & Indian Sargam Swaras
+ * Uses Krumhansl-Schmuckler Key Profiler, Diatonic Key Priority Weighting, 4096-point FFT Pitch Class Chromagram,
+ * and Indian Sargam (Sa Re Ga Ma Pa Dha Ni) Swaras.
  */
 
 class AudioAnalyzer {
@@ -11,7 +11,27 @@ class AudioAnalyzer {
         this.NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
         this.SARGAM_NAMES = ['Sa', 're', 'Re', 'ga', 'Ga', 'Ma', 'tM', 'Pa', 'dha', 'Dha', 'ni', 'Ni'];
 
-        // Complete set of 24 Chromatic Chord Pitch Class Profile (PCP) Templates
+        // Krumhansl-Schmuckler Key Profiles (Chord AI Engine)
+        this.MAJOR_KEY_PROFILE = [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88];
+        this.MINOR_KEY_PROFILE = [6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17];
+
+        // Diatonic Chord Sets from Chord AI Key Profiles
+        this.KEY_DIATONIC_CHORDS = {
+            'C': ['C', 'Dm', 'Em', 'F', 'G', 'Am', 'Bm'],
+            'C#': ['C#', 'D#m', 'Fm', 'F#', 'G#', 'A#m', 'Cm'],
+            'D': ['D', 'Em', 'F#m', 'G', 'A', 'Bm', 'C#m'],
+            'D#': ['D#', 'Fm', 'Gm', 'G#', 'A#', 'Cm', 'Dm'],
+            'E': ['E', 'F#m', 'G#m', 'A', 'B', 'C#m', 'D#m'],
+            'F': ['F', 'Gm', 'Am', 'A#', 'C', 'Dm', 'Em'],
+            'F#': ['F#', 'G#m', 'A#m', 'B', 'C#', 'D#m', 'Fm'],
+            'G': ['G', 'Am', 'Bm', 'C', 'D', 'Em', 'F#m'],
+            'G#': ['G#', 'A#m', 'Cm', 'C#', 'D#', 'Fm', 'Gm'],
+            'A': ['A', 'Bm', 'C#m', 'D', 'E', 'F#m', 'G#m'],
+            'A#': ['A#', 'Cm', 'Dm', 'D#', 'F', 'Gm', 'Am'],
+            'B': ['B', 'C#m', 'D#m', 'E', 'F#', 'G#m', 'A#m']
+        };
+
+        // Complete set of Chromatic Chord Pitch Class Profile (PCP) Templates
         this.CHORD_TEMPLATES = {
             'C':     [1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0],
             'Cm':    [1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
@@ -55,9 +75,6 @@ class AudioAnalyzer {
         };
     }
 
-    /**
-     * Bulletproof PCM AudioBuffer decoder with Promise + Callback + Synthetic fallback
-     */
     async decodeAudioBuffer(arrayBuffer) {
         if (!this.audioCtx) {
             this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -187,7 +204,7 @@ class AudioAnalyzer {
         if (onProgress) onProgress(70, 'Analyzing Beat Accents for Time Signature...');
         const timeSigInfo = this.detectTimeSignature(audioBuffer, bpm);
 
-        if (onProgress) onProgress(85, 'Calculating 4096-point FFT Pitch Class Chromagram...');
+        if (onProgress) onProgress(85, 'Calculating Chord AI Pitch Class Chromagram...');
         const chordTimeline = await this.extractFFTChordProgression(audioBuffer, bpm, onProgress);
 
         if (onProgress) onProgress(100, 'Analysis complete!');
@@ -315,19 +332,23 @@ class AudioAnalyzer {
         return { signature: bestResult.sig, description: bestResult.desc };
     }
 
+    /**
+     * Chord AI Key-Aware Chromagram Extraction Engine
+     */
     async extractFFTChordProgression(audioBuffer, bpm, onProgress) {
         if (!audioBuffer) return [];
         const duration = audioBuffer.duration;
         const beatSec = 60 / bpm;
         const sliceSec = Math.max(1.0, beatSec * 2);
         const numSlices = Math.floor(duration / sliceSec);
-        const rawTimeline = [];
         const pcm = audioBuffer.getChannelData(0);
         const sampleRate = audioBuffer.sampleRate;
 
         const fftSize = 4096;
         const numBins = fftSize / 2;
+        const sliceChromas = [];
 
+        // Step 1: Compute Chromagram Slices
         for (let s = 0; s < numSlices; s++) {
             const time = s * sliceSec;
             const startSample = Math.floor(time * sampleRate);
@@ -367,24 +388,62 @@ class AudioAnalyzer {
                 for (let c = 0; c < 12; c++) chroma[c] /= maxMag;
             }
 
-            const chord = this.matchChordFromChromagram(chroma);
+            sliceChromas.push(chroma);
+
+            if (onProgress && s % 5 === 0) {
+                const progressPct = 85 + Math.floor((s / numSlices) * 8);
+                onProgress(progressPct, `Extracting Chord AI Pitch Class Chromagram (${s + 1}/${numSlices})...`);
+            }
+        }
+
+        // Step 2: Estimate Global Key using Krumhansl-Schmuckler Key Profiler
+        const globalChroma = new Float32Array(12);
+        sliceChromas.forEach(ch => {
+            for (let c = 0; c < 12; c++) globalChroma[c] += ch[c];
+        });
+
+        let bestKeyScore = -100;
+        let detectedKey = 'C';
+
+        for (let kIdx = 0; kIdx < 12; kIdx++) {
+            let majScore = 0;
+            let minScore = 0;
+            for (let c = 0; c < 12; c++) {
+                const rotIdx = (c + kIdx) % 12;
+                majScore += globalChroma[rotIdx] * this.MAJOR_KEY_PROFILE[c];
+                minScore += globalChroma[rotIdx] * this.MINOR_KEY_PROFILE[c];
+            }
+            if (majScore > bestKeyScore) {
+                bestKeyScore = majScore;
+                detectedKey = this.NOTE_NAMES[kIdx];
+            }
+            if (minScore > bestKeyScore) {
+                bestKeyScore = minScore;
+                detectedKey = this.NOTE_NAMES[kIdx];
+            }
+        }
+
+        const diatonicSet = new Set(this.KEY_DIATONIC_CHORDS[detectedKey] || ['C', 'Dm', 'Em', 'F', 'G', 'Am']);
+
+        // Step 3: Match Chords with Diatonic Priority Weighting
+        const rawTimeline = [];
+        for (let s = 0; s < numSlices; s++) {
+            const time = s * sliceSec;
+            const chroma = sliceChromas[s];
+            const chord = this.matchChordFromChromagram(chroma, diatonicSet);
+
             rawTimeline.push({
                 time: time,
                 endTime: time + sliceSec,
                 chord: chord || 'C',
                 notes: this.CHORD_NOTES[chord || 'C'] || ['C4', 'E4', 'G4']
             });
-
-            if (onProgress && s % 5 === 0) {
-                const progressPct = 85 + Math.floor((s / numSlices) * 12);
-                onProgress(progressPct, `Extracting FFT Chords (${s + 1}/${numSlices} measures)...`);
-            }
         }
 
         return this.smoothChordTimeline(rawTimeline);
     }
 
-    matchChordFromChromagram(chroma) {
+    matchChordFromChromagram(chroma, diatonicSet = null) {
         let bestChord = 'C';
         let maxSim = -1;
 
@@ -397,7 +456,13 @@ class AudioAnalyzer {
                 normA += chroma[k] * chroma[k];
                 normB += template[k] * template[k];
             }
-            const sim = (normA > 0 && normB > 0) ? dot / (Math.sqrt(normA) * Math.sqrt(normB)) : 0;
+            let sim = (normA > 0 && normB > 0) ? dot / (Math.sqrt(normA) * Math.sqrt(normB)) : 0;
+            
+            // Chord AI Diatonic Priority Boost
+            if (diatonicSet && diatonicSet.has(chordName)) {
+                sim *= 1.25;
+            }
+
             if (sim > maxSim) {
                 maxSim = sim;
                 bestChord = chordName;

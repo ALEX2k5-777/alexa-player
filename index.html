@@ -34,7 +34,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Tonal Music Theory CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tonaljs/tonal/browser/tonal.min.js"></script>
-    <link rel="stylesheet" href="css/styles.css?v=3.0">
+    <link rel="stylesheet" href="css/styles.css?v=4.0">
 </head>
 <body class="bg-[#0b0f19] text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-blue-500 selection:text-white">
 
@@ -50,9 +50,9 @@
                         <h1 class="text-xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-amber-400 via-orange-200 to-red-300">
                             Alexa Player Pro
                         </h1>
-                        <span class="px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full">Indian Keyboard & Sargam</span>
+                        <span class="px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full">Chord AI Engine</span>
                     </div>
-                    <p class="text-xs text-slate-400">Audio Spectrum Analyzer • Sargam (Sa Re Ga Ma) Swaras • Indian Taal Profiler</p>
+                    <p class="text-xs text-slate-400">Chord AI Spectrum Profiler • Sargam (Sa Re Ga Ma) Swaras • Indian Taal Profiler</p>
                 </div>
             </div>
             
@@ -76,9 +76,10 @@
             </div>
             <div>
                 <h3 class="text-xl font-bold text-slate-100">Upload Indian Audio Track (Bollywood, Classical, Devotional)</h3>
-                <p class="text-sm text-slate-400 mt-1 max-w-md mx-auto">Drag & drop song file. Automatically extracts Sargam Swaras (Sa Re Ga Ma), Indian Taals (Keherwa, Dadra, Rupak), Chords & Keyboard Fingerings.</p>
+                <p class="text-sm text-slate-400 mt-1 max-w-md mx-auto">Drag & drop song file. Powered by Chord AI Krumhansl Key Engine for Sargam Swaras (Sa Re Ga Ma), Indian Taals, Chords & Fingerings.</p>
             </div>
             <div class="flex flex-wrap justify-center gap-2 text-xs text-slate-400 mt-2">
+                <span class="px-3 py-1 bg-slate-800/80 border border-slate-700/60 rounded-lg flex items-center gap-1.5"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i> Chord AI Engine</span>
                 <span class="px-3 py-1 bg-slate-800/80 border border-slate-700/60 rounded-lg flex items-center gap-1.5"><i data-lucide="music-2" class="w-3.5 h-3.5 text-amber-400"></i> Sargam Swaras (Sa Re Ga Ma)</span>
                 <span class="px-3 py-1 bg-slate-800/80 border border-slate-700/60 rounded-lg flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5 text-indigo-400"></i> Indian Taal (Keherwa/Dadra)</span>
                 <span class="px-3 py-1 bg-slate-800/80 border border-slate-700/60 rounded-lg flex items-center gap-1.5"><i data-lucide="piano" class="w-3.5 h-3.5 text-emerald-400"></i> Safed & Kali Scale Selector</span>
@@ -94,7 +95,7 @@
             </div>
             <div>
                 <h4 class="text-xl font-bold text-slate-100">Analyzing Indian Audio Track...</h4>
-                <p id="analysisStatusText" class="text-sm text-slate-400 mt-1">Extracting Sargam Swaras, Pitch Class Chromagram & Indian Taal Rhythms</p>
+                <p id="analysisStatusText" class="text-sm text-slate-400 mt-1">Extracting Chord AI Pitch Class Profile & Indian Taal Rhythms</p>
             </div>
             <div class="w-80 h-2.5 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700/50">
                 <div id="analysisProgressBar" class="h-full bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 rounded-full w-0 transition-all duration-300"></div>
@@ -200,7 +201,7 @@
                         </div>
                         <div>
                             <h2 id="trackTitle" class="text-base font-bold text-slate-100">Loaded Song Track</h2>
-                            <p id="trackMeta" class="text-xs text-slate-400">Audio File Ready • Indian Sargam Swaras & Taal Loaded</p>
+                            <p id="trackMeta" class="text-xs text-slate-400">Chord AI Music Engine Active • Sargam Swaras & Taal Loaded</p>
                         </div>
                     </div>
 
@@ -428,14 +429,14 @@
 
     <!-- Footer -->
     <footer class="border-t border-slate-900 bg-[#050811] py-5 text-center text-xs text-slate-500 mt-auto">
-        <p>Alexa Player Pro • Indian Music Sargam Swaras (Sa Re Ga Ma), Indian Taals & Harmonium Keyboard Guide</p>
+        <p>Alexa Player Pro • Powered by Chord AI Music Engine, Sargam Swaras (Sa Re Ga Ma), Indian Taals & Harmonium Guide</p>
     </footer>
 
     <!-- App JavaScript Scripts with Cache-Busting Parameters -->
-    <script src="js/audioAnalyzer.js?v=3.5"></script>
-    <script src="js/pianoVisualizer.js?v=3.5"></script>
-    <script src="js/player.js?v=3.5"></script>
-    <script src="js/app.js?v=3.5"></script>
+    <script src="js/audioAnalyzer.js?v=4.0"></script>
+    <script src="js/pianoVisualizer.js?v=4.0"></script>
+    <script src="js/player.js?v=4.0"></script>
+    <script src="js/app.js?v=4.0"></script>
     <script>
         lucide.createIcons();
     </script>
