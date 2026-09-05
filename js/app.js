@@ -21,16 +21,16 @@ document.addEventListener('DOMContentLoaded', () => {
         
         dropzone.addEventListener('dragover', (e) => {
             e.preventDefault();
-            dropzone.classList.add('border-amber-500', 'bg-amber-950/20');
+            dropzone.classList.add('border-blue-500', 'bg-blue-950/20');
         });
 
         dropzone.addEventListener('dragleave', () => {
-            dropzone.classList.remove('border-amber-500', 'bg-amber-950/20');
+            dropzone.classList.remove('border-blue-500', 'bg-blue-950/20');
         });
 
         dropzone.addEventListener('drop', (e) => {
             e.preventDefault();
-            dropzone.classList.remove('border-amber-500', 'bg-amber-950/20');
+            dropzone.classList.remove('border-blue-500', 'bg-blue-950/20');
             if (e.dataTransfer.files && e.dataTransfer.files[0]) {
                 processAudioFile(e.dataTransfer.files[0]);
             }
@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             duration: audioBuffer ? audioBuffer.duration : 180,
                             bpm: serverResult.bpm,
                             timeSignature: serverResult.timeSignature || '4/4',
-                            timeSigDescription: serverResult.timeSigDescription || 'Keherwa Taal (4/4 Beats)',
+                            timeSigDescription: serverResult.timeSigDescription || 'Common Time (4 Beats)',
                             chordsTimeline: serverResult.chordsTimeline || [],
                             audioBuffer: audioBuffer
                         };
@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 duration: 120,
                 bpm: defaultBpm,
                 timeSignature: '4/4',
-                timeSigDescription: 'Keherwa Taal (4/4 Beats)',
+                timeSigDescription: 'Common Time (4 Beats)',
                 chordsTimeline: defaultTimeline,
                 audioBuffer: dummyBuffer
             };

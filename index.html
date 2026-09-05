@@ -34,7 +34,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Tonal Music Theory CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tonaljs/tonal/browser/tonal.min.js"></script>
-    <link rel="stylesheet" href="css/styles.css?v=5.0">
+    <link rel="stylesheet" href="css/styles.css?v=6.0">
 </head>
 <body class="bg-[#0b0f19] text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-blue-500 selection:text-white">
 
@@ -50,9 +50,9 @@
                         <h1 class="text-xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-200 to-purple-300">
                             Alexa Player Pro
                         </h1>
-                        <span class="px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-full">Chord AI Engine</span>
+                        <span class="px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-full">AI Chord Studio</span>
                     </div>
-                    <p class="text-xs text-slate-400">Audio Spectrum Analyzer • Real-Time Chord Detection • Key Transposer & Piano Visualizer</p>
+                    <p class="text-xs text-slate-400">Audio Spectrum Analyzer • Auto Chord Detection • Key Transposer & Piano Visualizer</p>
                 </div>
             </div>
             
@@ -76,7 +76,7 @@
             </div>
             <div>
                 <h3 class="text-xl font-bold text-slate-100">Upload your Audio Track (MP3, WAV, M4A, FLAC)</h3>
-                <p class="text-sm text-slate-400 mt-1 max-w-md mx-auto">Drag & drop your song file here. Powered by Chord AI Krumhansl Key Engine for Tempo, Chords & Piano Fingerings.</p>
+                <p class="text-sm text-slate-400 mt-1 max-w-md mx-auto">Drag & drop your song file here. Powered by Chord AI Krumhansl Key Engine for Tempo, Chords, Key Transposition & Piano Fingerings.</p>
             </div>
             <div class="flex flex-wrap justify-center gap-2 text-xs text-slate-400 mt-2">
                 <span class="px-3 py-1 bg-slate-800/80 border border-slate-700/60 rounded-lg flex items-center gap-1.5"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-blue-400"></i> Chord AI Engine</span>
@@ -93,8 +93,8 @@
                 <i data-lucide="disc" class="w-10 h-10 text-blue-400 absolute inset-0 m-auto animate-pulse"></i>
             </div>
             <div>
-                <h4 class="text-xl font-bold text-slate-100">Analyzing Song Audio...</h4>
-                <p id="analysisStatusText" class="text-sm text-slate-400 mt-1">Extracting Chord AI Pitch Class Profile & Key Signature</p>
+                <h4 class="text-xl font-bold text-slate-100">Analyzing Audio Track...</h4>
+                <p id="analysisStatusText" class="text-sm text-slate-400 mt-1">Extracting Pitch Class Profile & Key Signature</p>
             </div>
             <div class="w-80 h-2.5 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700/50">
                 <div id="analysisProgressBar" class="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-full w-0 transition-all duration-300"></div>
@@ -418,10 +418,10 @@
     </footer>
 
     <!-- App JavaScript Scripts with Cache-Busting Parameters -->
-    <script src="js/audioAnalyzer.js?v=5.0"></script>
-    <script src="js/pianoVisualizer.js?v=5.0"></script>
-    <script src="js/player.js?v=5.0"></script>
-    <script src="js/app.js?v=5.0"></script>
+    <script src="js/audioAnalyzer.js?v=6.0"></script>
+    <script src="js/pianoVisualizer.js?v=6.0"></script>
+    <script src="js/player.js?v=6.0"></script>
+    <script src="js/app.js?v=6.0"></script>
     <script>
         lucide.createIcons();
     </script>
