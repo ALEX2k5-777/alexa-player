@@ -34,7 +34,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Tonal Music Theory CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tonaljs/tonal/browser/tonal.min.js"></script>
-    <link rel="stylesheet" href="css/styles.css?v=6.0">
+    <link rel="stylesheet" href="css/styles.css?v=7.0">
 </head>
 <body class="bg-[#0b0f19] text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-blue-500 selection:text-white">
 
@@ -52,7 +52,7 @@
                         </h1>
                         <span class="px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-full">AI Chord Studio</span>
                     </div>
-                    <p class="text-xs text-slate-400">Audio Spectrum Analyzer • Auto Chord Detection • Key Transposer & Piano Visualizer</p>
+                    <p class="text-xs text-slate-400">Bass Root Note Frequency Isolation • Key Transposer & Piano Visualizer</p>
                 </div>
             </div>
             
@@ -76,10 +76,10 @@
             </div>
             <div>
                 <h3 class="text-xl font-bold text-slate-100">Upload your Audio Track (MP3, WAV, M4A, FLAC)</h3>
-                <p class="text-sm text-slate-400 mt-1 max-w-md mx-auto">Drag & drop your song file here. Powered by Chord AI Krumhansl Key Engine for Tempo, Chords, Key Transposition & Piano Fingerings.</p>
+                <p class="text-sm text-slate-400 mt-1 max-w-md mx-auto">Drag & drop your song file here. Powered by Bass Root Isolation Engine for Ultra-Accurate Chord Recognition.</p>
             </div>
             <div class="flex flex-wrap justify-center gap-2 text-xs text-slate-400 mt-2">
-                <span class="px-3 py-1 bg-slate-800/80 border border-slate-700/60 rounded-lg flex items-center gap-1.5"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-blue-400"></i> Chord AI Engine</span>
+                <span class="px-3 py-1 bg-slate-800/80 border border-slate-700/60 rounded-lg flex items-center gap-1.5"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-blue-400"></i> Bass Root Note Isolation</span>
                 <span class="px-3 py-1 bg-slate-800/80 border border-slate-700/60 rounded-lg flex items-center gap-1.5"><i data-lucide="activity" class="w-3.5 h-3.5 text-indigo-400"></i> BPM & Meter Detection</span>
                 <span class="px-3 py-1 bg-slate-800/80 border border-slate-700/60 rounded-lg flex items-center gap-1.5"><i data-lucide="piano" class="w-3.5 h-3.5 text-emerald-400"></i> 3D Keyboard Fingerings</span>
             </div>
@@ -94,7 +94,7 @@
             </div>
             <div>
                 <h4 class="text-xl font-bold text-slate-100">Analyzing Audio Track...</h4>
-                <p id="analysisStatusText" class="text-sm text-slate-400 mt-1">Extracting Pitch Class Profile & Key Signature</p>
+                <p id="analysisStatusText" class="text-sm text-slate-400 mt-1">Extracting Bass Root Frequency Band & Polyphonic Pitch Chromagram</p>
             </div>
             <div class="w-80 h-2.5 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700/50">
                 <div id="analysisProgressBar" class="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-full w-0 transition-all duration-300"></div>
@@ -186,7 +186,7 @@
                         </div>
                         <div>
                             <h2 id="trackTitle" class="text-base font-bold text-slate-100">Loaded Song Track</h2>
-                            <p id="trackMeta" class="text-xs text-slate-400">Audio File Ready • High Precision Chord AI Chromagram Loaded</p>
+                            <p id="trackMeta" class="text-xs text-slate-400">Audio File Ready • High Precision Bass Root Chromagram Active</p>
                         </div>
                     </div>
 
@@ -414,14 +414,14 @@
 
     <!-- Footer -->
     <footer class="border-t border-slate-900 bg-[#050811] py-5 text-center text-xs text-slate-500 mt-auto">
-        <p>Alexa Player Pro • Powered by Chord AI Music Engine, Western Music Theory & Interactive Piano Guide</p>
+        <p>Alexa Player Pro • Powered by High-Precision Bass-Root Chord AI Engine, Western Music Theory & Piano Guide</p>
     </footer>
 
     <!-- App JavaScript Scripts with Cache-Busting Parameters -->
-    <script src="js/audioAnalyzer.js?v=6.0"></script>
-    <script src="js/pianoVisualizer.js?v=6.0"></script>
-    <script src="js/player.js?v=6.0"></script>
-    <script src="js/app.js?v=6.0"></script>
+    <script src="js/audioAnalyzer.js?v=7.0"></script>
+    <script src="js/pianoVisualizer.js?v=7.0"></script>
+    <script src="js/player.js?v=7.0"></script>
+    <script src="js/app.js?v=7.0"></script>
     <script>
         lucide.createIcons();
     </script>
